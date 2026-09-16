@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+
+@theme {
+  --font-sans: 'Tajawal', system-ui, sans-serif;
+
+  --color-primary: #6C5CE7;
+  --color-primary-dark: #5642D6;
+  --color-primary-light: #EDE9FE;
+
+  --color-secondary: #00B894;
+  --color-warning: #FDCB6E;
+  --color-danger: #E17055;
+  --color-info: #74B9FF;
+
+  --color-neutral-900: #2D3436;
+  --color-neutral-700: #4A5254;
+  --color-neutral-600: #636E72;
+  --color-neutral-400: #B2BEC3;
+  --color-neutral-300: #DFE6E9;
+  --color-neutral-200: #EBEEF0;
+  --color-neutral-100: #F5F6FA;
+
+  --color-surface: #FFFFFF;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  margin: 0;
+  font-family: 'Tajawal', system-ui, sans-serif;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-900);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.ltr-numerals {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
