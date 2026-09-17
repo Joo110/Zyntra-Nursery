@@ -1,7 +1,7 @@
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
-import { addSalarySchema, type AddSalaryFormValues } from '../types/salary.schema';
+import { addSalarySchema, type AddSalaryFormInput, type AddSalaryFormValues } from '../types/salary.schema';
 import { Input } from '@/components/forms/Input';
 import { Select } from '@/components/forms/Select';
 import { DatePicker } from '@/components/forms/DatePicker';
@@ -21,7 +21,15 @@ interface Props {
 
 /** فورم تسجيل/تعديل راتب معلم أو عامل — العضو يُختار حسب نوعه (Teacher/Worker) */
 export function SalaryForm({ branchId, onSubmit, isLoading, onCancel }: Props) {
-  const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<AddSalaryFormValues>({
+  // نمرر نوعين لـ useForm: نوع الإدخال (Input) قبل الـ coerce، ونوع الإخراج (Output) بعد الـ validation
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<AddSalaryFormInput, any, AddSalaryFormValues>({
     resolver: zodResolver(addSalarySchema),
     defaultValues: {
       employeeType: MemberType.Teacher,
@@ -58,8 +66,13 @@ export function SalaryForm({ branchId, onSubmit, isLoading, onCancel }: Props) {
 
   const employeeOptions = employeeType === MemberType.Teacher ? teachers?.items : workers?.items;
 
+  const handleFormSubmit = handleSubmit((values) => {
+    // بعد نجاح الـ validation، values بتكون بنوع الإخراج (AddSalaryFormValues)
+    onSubmit(values as AddSalaryFormValues);
+  });
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+    <form onSubmit={handleFormSubmit} className="flex flex-col gap-4" noValidate>
       <FormField label="نوع الموظف" required htmlFor="employeeType">
         <Controller
           control={control}

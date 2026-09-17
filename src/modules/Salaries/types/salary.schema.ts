@@ -8,4 +8,8 @@ export const addSalarySchema = z.object({
   isPaid: z.boolean().default(false),
 });
 
-export type AddSalaryFormValues = z.infer<typeof addSalarySchema>;
+/** نوع الإدخال قبل التحويل (amount ممكن يوصل كـ string من الـ input الأول) — يُستخدم في useForm */
+export type AddSalaryFormInput = z.input<typeof addSalarySchema>;
+
+/** نوع الإخراج بعد الـ validation/coerce (amount: number) — ده اللي بيوصل لـ onSubmit */
+export type AddSalaryFormValues = z.output<typeof addSalarySchema>;
