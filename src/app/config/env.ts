@@ -14,7 +14,7 @@ function readEnvVar(key: string, fallback?: string): string {
 }
 
 export const env = {
-  apiBaseUrl: readEnvVar('VITE_API_BASE_URL', 'https://localhost:7000/api'),
+  apiBaseUrl: readEnvVar('VITE_API_BASE_URL', 'https://zyntranurseryback.runasp.net/api'),
   isDev: import.meta.env.DEV,
   isProd: import.meta.env.PROD,
 };
