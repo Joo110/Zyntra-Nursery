@@ -17,6 +17,7 @@ import { GraduationPage } from '@/modules/Graduation/pages/GraduationPage';
 import { TeachersPage } from '@/modules/Teachers/pages/TeachersPage';
 import { WorkersPage } from '@/modules/Workers/pages/WorkersPage';
 import { AttendancePage } from '@/modules/Attendance/pages/AttendancePage';
+import { StaffAttendancePage } from '@/modules/Attendance/pages/StaffAttendancePage';
 import { AbsencePage } from '@/modules/Absence/pages/AbsencePage';
 import { DeparturePage } from '@/modules/Departure/pages/DeparturePage';
 import { EvaluationsPage } from '@/modules/Evaluations/pages/EvaluationsPage';
@@ -65,6 +66,7 @@ export function AppRouter() {
             <Route path={ROUTES.WORKERS} element={<WorkersPage />} />
 
             <Route path={ROUTES.ATTENDANCE} element={<AttendancePage />} />
+            <Route path={ROUTES.STAFF_ATTENDANCE} element={<StaffAttendancePage />} />
             <Route path={ROUTES.ABSENCE} element={<AbsencePage />} />
             <Route path={ROUTES.DEPARTURE} element={<DeparturePage />} />
 

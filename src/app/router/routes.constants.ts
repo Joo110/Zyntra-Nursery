@@ -16,6 +16,7 @@ export const ROUTES = {
   TEACHERS: '/teachers',
   WORKERS: '/workers',
   ATTENDANCE: '/attendance',
+  STAFF_ATTENDANCE: '/staff-attendance',
   ABSENCE: '/absence',
   DEPARTURE: '/departure',
   EVALUATIONS: '/evaluations',

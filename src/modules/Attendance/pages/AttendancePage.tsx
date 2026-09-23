@@ -91,8 +91,18 @@ export function AttendancePage() {
   const deleteAllAttendance = useDeleteAllAttendance(branchId ?? '');
 
   // استبعاد الطلاب اللي سجلوا حضورهم بالفعل من قائمة الاختيار
-  const attendedIds = useMemo(() => new Set((data?.items ?? []).map((i) => i.id ?? i.id)), [data?.items]);
-  const availableChildren = useMemo(() => (children ?? []).filter((c) => !attendedIds.has(c.id)), [children, attendedIds]);
+  // ⚠️ تصحيح: AttendanceHistoryDto لا يحتوي على معرّف الطفل (childId)، فقط معرّف سجل الحضور نفسه (id).
+  // كانت المقارنة القديمة تقارن id سجل الحضور بـ id الطفل (لا يتطابقان أبدًا)، فيظل الطالب ظاهرًا في
+  // القائمة رغم تسجيل حضوره فعلاً، ويقدر المستخدم يضيفه مرة تانية فيظهر "مكرر" في الجدول.
+  // بديل مؤقت للمطابقة (بالاسم) لحد ما الـ Backend يضيف childId لسجل الحضور.
+  const attendedNames = useMemo(
+    () => new Set((data?.items ?? []).map((i) => i.name?.trim().toLowerCase()).filter(Boolean)),
+    [data?.items]
+  );
+  const availableChildren = useMemo(
+    () => (children ?? []).filter((c) => !attendedNames.has(c.name?.trim().toLowerCase())),
+    [children, attendedNames]
+  );
 
   const lateCount = useMemo(() => (data?.items ?? []).filter((i) => (i.late ?? 0) > 0).length, [data?.items]);
 
@@ -105,7 +115,7 @@ export function AttendancePage() {
   };
 
   const handleRegisterAttendance = () => {
-    if (!selectedChildId || !departmentId) return;
+    if (!selectedChildId || !departmentId || addAttendance.isPending) return;
     addAttendance.mutate(
       { departmentId, childId: selectedChildId, dateTime: new Date().toISOString() },
       { onSuccess: () => setSelectedChildId('') }
@@ -179,7 +189,7 @@ export function AttendancePage() {
                 icon={<UserCheck className="h-4 w-4" />}
                 onClick={handleRegisterAttendance}
                 isLoading={addAttendance.isPending}
-                disabled={!selectedChildId || availableChildren.length === 0}
+                disabled={!selectedChildId || availableChildren.length === 0 || addAttendance.isPending}
               >
                 تسجيل حضور
               </Button>

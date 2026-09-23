@@ -56,9 +56,9 @@ export function ManualTreasuryForm({ onSubmit, isLoading, onCancel }: Props) {
         <Input id="note" {...register('note')} error={errors.note?.message} placeholder="مثال: شراء أدوات نظافة" />
       </FormField>
 
-      <p className="text-xs text-neutral-400">
-        ⚠️ حقل الملاحظة لا يُرسل حاليًا للباك (AddTreasuryDataDto لا يدعمه بعد) — يُعرض هنا فقط تمهيدًا
-        لإضافته، برجاء تنسيقه مع فريق الباك.
+      <p className="text-xs text-amber-600">
+        ⚠️ هذه الملاحظة لن يتم حفظها مع الحركة حاليًا، والنظام لا يدعم حفظ ملاحظات مع حركات الخزينة في الوقت الحالي.
+        الحقل موجود هنا فقط للتذكير أثناء إدخال البيانات، وسيتم تفعيل حفظه فور توفر هذه الإمكانية.
       </p>
 
       <div className="mt-2 flex gap-2">

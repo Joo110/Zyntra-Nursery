@@ -5,6 +5,7 @@ import { addSubscriptionSchema, type AddSubscriptionFormValues } from '../types/
 import { Input } from '@/components/forms/Input';
 import { DatePicker } from '@/components/forms/DatePicker';
 import { ChildDropdown } from '@/components/common/ChildDropdown';
+import { DepartmentSelector } from '@/components/common/DepartmentSelector';
 import { FormField } from '@/components/forms/FormField';
 import { Button } from '@/components/common/Button';
 import { Modal } from '@/components/modals/Modal';
@@ -31,12 +32,17 @@ interface Props {
 }
 
 export function SubscriptionForm({
-  branchId, departmentId, period, onSubmit, isLoading, onCancel,
+  branchId, departmentId: initialDepartmentId, period, onSubmit, isLoading, onCancel,
 }: Props) {
   const { register, handleSubmit, control, formState: { errors } } = useForm({
     resolver: zodResolver(addSubscriptionSchema),
     defaultValues: { isPaid: false, monthSubscription: new Date().toISOString().slice(0, 10) },
   });
+
+  // ⚠️ فلتر القسم في صفحة الاشتراكات اختياري وممكن يكون فاضي (لسه محددش المستخدم قسم)،
+  // فلو اعتمدنا عليه وحده هيفضل الـ dropdown بتاع الطالب معطّل جوه الفورم بلا أي طريقة لتغييره.
+  // بنمسك اختيار القسم بحالة داخلية جوه الفورم نفسه، تتهيّأ بقيمة فلتر الصفحة (لو موجودة) وتقدر تتغيّر هنا مباشرة.
+  const [departmentId, setDepartmentId] = useState(initialDepartmentId ?? '');
 
   // نفس قائمة الأطفال اللي بيستخدمها ChildDropdown، بنستخدمها هنا لعمل lookup لاسم الطالب
   // (React Query هيرجعها من الكاش من غير ريكوست إضافي طالما نفس query key)
@@ -65,6 +71,9 @@ export function SubscriptionForm({
   return (
     <>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4" noValidate>
+        <FormField label="القسم" htmlFor="departmentId">
+          <DepartmentSelector branchId={branchId} value={departmentId} onChange={setDepartmentId} />
+        </FormField>
         <FormField label="الطالب" required error={errors.childId?.message} htmlFor="childId">
           <Controller
             control={control}

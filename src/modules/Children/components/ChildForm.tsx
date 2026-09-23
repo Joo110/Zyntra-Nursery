@@ -183,17 +183,15 @@ export function ChildForm({ branchId, initialData, onSubmit, isLoading, onCancel
       </section>
 
       <section className="flex flex-col gap-4">
-        <h3 className="text-sm font-semibold text-neutral-700">مقدمة الحجز (Advance Payment)</h3>
+        <h3 className="text-sm font-semibold text-neutral-700">مقدمة الحجز</h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField label="مبلغ المقدمة" error={errors.advancePaymentAmount?.message} htmlFor="advancePaymentAmount">
+            <Input id="advancePaymentAmount" type="number" step="0.01" className="ltr-numerals" {...register('advancePaymentAmount')} error={errors.advancePaymentAmount?.message} />
+          </FormField>
           <label className="flex items-center gap-2 text-sm text-neutral-700">
             <input type="checkbox" className="h-4 w-4 rounded border-neutral-300" {...register('isAdvancePaymentMade')} />
-            تم دفع المقدمة؟
+            تم دفع المقدمة
           </label>
-          {isAdvancePaymentMade && (
-            <FormField label="مبلغ المقدمة المدفوع" required error={errors.advancePaymentAmount?.message} htmlFor="advancePaymentAmount">
-              <Input id="advancePaymentAmount" type="number" step="0.01" className="ltr-numerals" {...register('advancePaymentAmount')} error={errors.advancePaymentAmount?.message} />
-            </FormField>
-          )}
         </div>
         {isAdvancePaymentMade && (
           <p className="text-xs text-neutral-400">

@@ -67,6 +67,7 @@ export const navGroups = [
     label: 'العمليات اليومية',
     items: [
       { to: ROUTES.ATTENDANCE, label: 'الحضور', icon: UserCheck },
+      { to: ROUTES.STAFF_ATTENDANCE, label: 'حضور الموظفين', icon: UserCog },
       { to: ROUTES.ABSENCE, label: 'الغياب', icon: UserX },
       { to: ROUTES.DEPARTURE, label: 'الانصراف', icon: LogOut },
       { to: ROUTES.EVALUATIONS, label: 'تقييم اليوم', icon: Trophy },
