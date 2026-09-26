@@ -9,7 +9,7 @@ const periodLabel = (p: Period) => (p === Period.AM ? 'صباحي' : 'مسائي
 
 export function ChildrenPrintPage() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id) ?? '';
-  const branchName = useBranchStore((s) => s.selectedBranch?.name) ?? '';
+  const branchName = useBranchStore((s) => s.selectedBranch?.branchName) ?? '';
   const [searchParams] = useSearchParams();
 
   const departmentId = searchParams.get('departmentId') ?? undefined;
