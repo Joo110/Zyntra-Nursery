@@ -23,6 +23,15 @@ export function useChildrenList(
   });
 }
 
+export function useChildrenReport(branchId: string, departmentId?: string, period?: Period, name?: string) {
+  return useQuery({
+    queryKey: ['children', 'report', branchId, departmentId, period, name],
+    queryFn: () => childService.getReport(branchId, departmentId, period, name),
+    enabled: !!branchId,
+    staleTime: 0,
+  });
+}
+
 export function useChild(branchId: string, id: string | undefined) {
   return useQuery({
     queryKey: childrenKeys.detail(branchId, id ?? ''),

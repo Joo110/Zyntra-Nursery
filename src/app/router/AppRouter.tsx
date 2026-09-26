@@ -12,6 +12,7 @@ import { ChildCreatePage } from '@/modules/Children/pages/ChildCreatePage';
 import { ChildEditPage } from '@/modules/Children/pages/ChildEditPage';
 import { ChildrenArchivePage } from '@/modules/Children/pages/ChildrenArchivePage';
 import { ChildrenBirthdaysPage } from '@/modules/Children/pages/ChildrenBirthdaysPage';
+import { ChildrenPrintPage } from '@/modules/Children/pages/ChildrenPrintPage';
 import { BrothersPage } from '@/modules/Brothers/pages/BrothersPage';
 import { GraduationPage } from '@/modules/Graduation/pages/GraduationPage';
 import { TeachersPage } from '@/modules/Teachers/pages/TeachersPage';
@@ -59,6 +60,7 @@ export function AppRouter() {
             <Route path="/children/:id/edit" element={<ChildEditPage />} />
             <Route path={ROUTES.CHILDREN_ARCHIVE} element={<ChildrenArchivePage />} />
             <Route path={ROUTES.CHILDREN_BIRTHDAYS} element={<ChildrenBirthdaysPage />} />
+            <Route path={ROUTES.CHILDREN_PRINT} element={<ChildrenPrintPage />} />
 
             <Route path={ROUTES.BROTHERS} element={<BrothersPage />} />
             <Route path={ROUTES.GRADUATION} element={<GraduationPage />} />

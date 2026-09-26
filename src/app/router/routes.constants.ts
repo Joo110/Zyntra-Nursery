@@ -11,6 +11,7 @@ export const ROUTES = {
   childEdit: (id: string) => `/children/${id}/edit`,
   CHILDREN_ARCHIVE: '/children/archive',
   CHILDREN_BIRTHDAYS: '/children/birthdays',
+  CHILDREN_PRINT: '/children/print',
   BROTHERS: '/brothers',
   GRADUATION: '/graduation',
   TEACHERS: '/teachers',

@@ -52,6 +52,13 @@ export const childService = {
       })
       .then((res) => res.data),
 
+        getReport: (branchId: string, departmentId?: string, period?: Period, name?: string) =>
+    axiosInstance
+      .get<ChildListDto[]>(`/branches/${branchId}/Child/report`, {
+        params: { departmentId: departmentId || undefined, period, name },
+      })
+      .then((res) => res.data),
+      
   setActive: (branchId: string, id: string, isActive: boolean) =>
     axiosInstance
       .put<MessageResponse>(`/branches/${branchId}/Child/active/${id}`, null, { params: { isActive } })

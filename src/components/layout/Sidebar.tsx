@@ -29,8 +29,8 @@ export function Sidebar() {
     collapsed ? 'h-auto flex-col py-3' : 'h-16'
   )}
 >
-  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white font-bold">
-    ز
+  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary">
+    <img src="/logo.jpeg" alt="Zyntra" className="h-full w-full object-cover" />
   </div>
   {!collapsed && <span className="text-lg font-bold text-neutral-900">Zyntra</span>}
 

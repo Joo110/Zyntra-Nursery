@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Archive, Cake } from 'lucide-react';
+import { Plus, Pencil, Trash2, Archive, Cake, Printer } from 'lucide-react';
 import { useChildrenList, useDeleteChild, useSetChildActive } from '../hooks/useChildren';
 import type { ChildListDto } from '../types/child.types';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
@@ -54,6 +54,14 @@ export function ChildrenPage() {
     setSearchParams(params);
   };
 
+  const handlePrint = () => {
+    const params = new URLSearchParams();
+    if (departmentId) params.set('departmentId', departmentId);
+    params.set('period', String(period));
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    window.open(`${ROUTES.CHILDREN_PRINT}?${params.toString()}`, '_blank');
+  };
+
   const columns: ColumnDef<ChildListDto>[] = [
     { key: 'name', header: 'اسم الطالب', render: (row) => row.name || '—' },
     { key: 'gender', header: 'النوع', render: (row) => <GenderBadge gender={row.gender} /> },
@@ -70,6 +78,9 @@ export function ChildrenPage() {
           <p className="text-sm text-neutral-500">إدارة طلاب الفرع المختار</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" icon={<Printer className="h-4 w-4" />} onClick={handlePrint}>
+            طباعة تقرير
+          </Button>
           <Button variant="outline" icon={<Cake className="h-4 w-4" />} onClick={() => navigate(ROUTES.CHILDREN_BIRTHDAYS)}>
             أعياد الميلاد
           </Button>
