@@ -8,8 +8,10 @@ import { departmentKeys } from '@/constants/queryKeys.constants';
 
 export const subscriptionKeys = {
   all: ['subscriptions'] as const,
-  unpaid: (branchId: string, period: Period, pageNumber: number, take: number) =>
-    [...subscriptionKeys.all, 'unpaid', branchId, period, { pageNumber, take }] as const,
+  unpaid: (branchId: string, period: Period, pageNumber: number, take: number, departmentId?: string) =>
+    [...subscriptionKeys.all, 'unpaid', branchId, period, { pageNumber, take, departmentId }] as const,
+  departmentSummary: (branchId: string, departmentId: string, period: Period) =>
+    [...subscriptionKeys.all, 'department-summary', branchId, departmentId, period] as const,
   paymentHistoryByChild: (branchId: string, childId: string, pageNumber: number, take: number) =>
     [...subscriptionKeys.all, 'payment-history', branchId, childId, { pageNumber, take }] as const,
   paymentHistoryByRange: (branchId: string, dateFrom: string, dateTo: string, pageNumber: number, take: number) =>
@@ -21,11 +23,27 @@ export const subscriptionKeys = {
 };
 
 /** راجع 05-Caching-....md: Subscriptions staleTime = 30 ثانية */
-export function useUnpaidSubscriptions(branchId: string, period: Period, pageNumber: number, take: number) {
+export function useUnpaidSubscriptions(
+  branchId: string,
+  period: Period,
+  pageNumber: number,
+  take: number,
+  departmentId?: string
+) {
   return useQuery({
-    queryKey: subscriptionKeys.unpaid(branchId, period, pageNumber, take),
-    queryFn: () => subscriptionService.getUnpaid(branchId, period, pageNumber, take),
+    queryKey: subscriptionKeys.unpaid(branchId, period, pageNumber, take, departmentId),
+    queryFn: () => subscriptionService.getUnpaid(branchId, period, pageNumber, take, departmentId),
     enabled: !!branchId,
+    staleTime: 30_000,
+  });
+}
+
+/** ملخص القسم: عدد الطلاب + إجمالي السعر + الأسماء (بيشتغل بس لما يتحدد قسم) */
+export function useDepartmentSubscriptionSummary(branchId: string, departmentId: string, period: Period) {
+  return useQuery({
+    queryKey: subscriptionKeys.departmentSummary(branchId, departmentId, period),
+    queryFn: () => subscriptionService.getDepartmentSummary(branchId, departmentId, period),
+    enabled: !!branchId && !!departmentId,
     staleTime: 30_000,
   });
 }

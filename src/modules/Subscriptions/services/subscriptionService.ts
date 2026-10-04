@@ -10,13 +10,34 @@ import type {
 } from '../types/subscription.types';
 import type { Period } from '@/types/enums.types';
 
+/**
+ * ⚠️ شكل افتراضي لرد الـ endpoint الجديد (department controller).
+ * لو الـ response عندك مختلف عدّل الـ interface دي بس، وباقي الكود هيفضل شغال.
+ */
+export interface DepartmentSubscriptionSummaryDto {
+  studentsCount: number;
+  totalAmount: number;
+  students: { id: string; name: string }[];
+}
+
 /** راجع 02-API-Contract-Detailed.md § 14) Subscriptions */
 export const subscriptionService = {
-  getUnpaid: (branchId: string, period: Period, pageNumber: number, take: number) =>
+  getUnpaid: (branchId: string, period: Period, pageNumber: number, take: number, departmentId?: string) =>
     axiosInstance
       .get<PagedResult<PaymentSubscriptionInfoDto>>(`/branches/${branchId}/Subscriptions/unpaid-subscriptions`, {
-        params: { period, pageNumber, take },
+        params: { period, pageNumber, take, departmentId: departmentId || undefined },
       })
+      .then((res) => res.data),
+
+  /**
+   * ⚠️ الـ URL افتراضي — عدّله ليطابق الـ endpoint اللي ضفته في DepartmentController.
+   */
+  getDepartmentSummary: (branchId: string, departmentId: string, period: Period) =>
+    axiosInstance
+      .get<DepartmentSubscriptionSummaryDto>(
+        `/branches/${branchId}/Departments/${departmentId}/subscription-summary`,
+        { params: { period } }
+      )
       .then((res) => res.data),
 
   getPaymentHistoryByChild: (branchId: string, childId: string, pageNumber: number, take: number) =>

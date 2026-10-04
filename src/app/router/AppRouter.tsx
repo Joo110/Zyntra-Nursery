@@ -23,8 +23,9 @@ import { AbsencePage } from '@/modules/Absence/pages/AbsencePage';
 import { DeparturePage } from '@/modules/Departure/pages/DeparturePage';
 import { EvaluationsPage } from '@/modules/Evaluations/pages/EvaluationsPage';
 import { EvaluationsWinnersPage } from '@/modules/Evaluations/pages/EvaluationsWinnersPage';
+import { EvaluationsHistoryPage } from '@/modules/Evaluations/pages/Evaluationshistorypage';
 import { SubscriptionsPage } from '@/modules/Subscriptions/pages/SubscriptionsPage';
-import { ChildrenSubscriptionInfoPage } from '@/modules/Subscriptions/pages/ChildrenSubscriptionInfoPage'; // جديد
+import { ChildrenSubscriptionInfoPage } from '@/modules/Subscriptions/pages/ChildrenSubscriptionInfoPage';
 import { TreasuryPage } from '@/modules/Treasury/pages/TreasuryPage';
 import { SalariesPage } from '@/modules/Salaries/pages/SalariesPage';
 import { BusesPage } from '@/modules/Buses/pages/BusesPage';
@@ -74,6 +75,7 @@ export function AppRouter() {
 
             <Route path={ROUTES.EVALUATIONS} element={<EvaluationsPage />} />
             <Route path={ROUTES.EVALUATIONS_WINNERS} element={<EvaluationsWinnersPage />} />
+            <Route path={ROUTES.EVALUATIONS_HISTORY} element={<EvaluationsHistoryPage />} /> {/* جديد */}
 
             <Route path={ROUTES.SUBSCRIPTIONS} element={<SubscriptionsPage />} />
             <Route path={ROUTES.CHILDREN_SUBSCRIPTION_INFO} element={<ChildrenSubscriptionInfoPage />} /> {/* جديد */}

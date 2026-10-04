@@ -10,7 +10,6 @@ export const messageArchiveService = {
       .get<PagedResult<MessageArchiveDto>>(`/branches/${branchId}/MessageArchive/list`, { params: { pageNumber, take } })
       .then((res) => res.data),
 
-  /** ⚠️ memberType JSON body property — نفس مشكلة Salaries/Treasury، لازم اسم العضو الكامل */
   add: (branchId: string, dto: AddMessageArchiveDto) =>
     axiosInstance
       .post<MessageResponse>(`/branches/${branchId}/MessageArchive`, {

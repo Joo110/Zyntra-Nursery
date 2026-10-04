@@ -1,7 +1,4 @@
-/**
- * إعدادات البيئة المركزية — لا تضع API URL بشكل Hardcoded في أي مكان آخر بالمشروع.
- * (راجع Master Prompt بند 19)
- */
+
 function readEnvVar(key: string, fallback?: string): string {
   const value = import.meta.env[key] as string | undefined;
   if (!value) {

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { evaluationService } from '../services/evaluationService';
+import { evaluationService, type EvaluationHistoryParams } from '../services/evaluationService';
 import type { Period } from '@/types/enums.types';
 import type { ApiError } from '@/types/api-error.types';
 import type { UpdateDayEvaluationDto } from '../types/evaluation.types';
@@ -9,6 +9,8 @@ export const evaluationKeys = {
   all: ['evaluations'] as const,
   info: (branchId: string, classId: string, period: Period, pageNumber: number, take: number) =>
     [...evaluationKeys.all, 'info', branchId, classId, period, { pageNumber, take }] as const,
+  history: (branchId: string, p: EvaluationHistoryParams) =>
+    [...evaluationKeys.all, 'history', branchId, p] as const,
   average: (branchId: string, period: Period, pageNumber: number, take: number) =>
     [...evaluationKeys.all, 'average', branchId, period, { pageNumber, take }] as const,
   winnerHistory: (branchId: string, pageNumber: number, take: number) =>
@@ -23,6 +25,16 @@ export function useEvaluationInfo(branchId: string, classId: string, period: Per
     queryFn: () => evaluationService.getInfo(branchId, classId, period, pageNumber, take),
     enabled: !!branchId && !!classId,
     staleTime: 0,
+  });
+}
+
+/** سجل التقييمات اليومية بالتاريخ */
+export function useEvaluationHistory(branchId: string, params: EvaluationHistoryParams) {
+  return useQuery({
+    queryKey: evaluationKeys.history(branchId, params),
+    queryFn: () => evaluationService.getHistory(branchId, params),
+    enabled: !!branchId && !!params.dateFrom && !!params.dateTo,
+    staleTime: 30_000,
   });
 }
 

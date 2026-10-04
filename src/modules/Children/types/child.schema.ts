@@ -17,7 +17,6 @@ export const addChildSchema = z.object({
   gender: z.coerce.number(),
   callPhoneNumber: z.string().min(1, 'رقم هاتف التواصل مطلوب'),
   period: z.coerce.number(),
-  subscirptionAmount: z.coerce.number().min(0, 'يجب أن يكون المبلغ رقمًا موجبًا'),
   howYouKnowNursery: z.coerce.number(),
   socialStatus: z.coerce.number().optional(),
   messageNumber: z.string().min(1, 'رقم الرسائل مطلوب'),

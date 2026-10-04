@@ -9,6 +9,7 @@ import {
   UserX,
   LogOut,
   Trophy,
+  History,
   Wallet,
   Coins,
   MessageSquare,
@@ -71,6 +72,7 @@ export const navGroups = [
       { to: ROUTES.ABSENCE, label: 'الغياب', icon: UserX },
       { to: ROUTES.DEPARTURE, label: 'الانصراف', icon: LogOut },
       { to: ROUTES.EVALUATIONS, label: 'تقييم اليوم', icon: Trophy },
+      { to: ROUTES.EVALUATIONS_HISTORY, label: 'سجل التقييمات', icon: History },
     ],
   },
   {

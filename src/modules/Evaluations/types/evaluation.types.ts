@@ -22,6 +22,27 @@ export interface EvaluationAverageDto {
   className: string;
 }
 
+/**
+ * ⚠️ شكل افتراضي لرد endpoint سجل التقييمات اليومية.
+ * لو الـ DTO عندك مختلف عدّل هنا بس.
+ */
+export interface EvaluationHistoryDto {
+  id: string;
+  date: string;
+  childId: string;
+  childName: string;
+  className: string;
+  gender: Gender;
+  degree1: boolean;
+  degree2: boolean;
+  degree3: boolean;
+  degree4: boolean;
+  degree5: boolean;
+  degree6: boolean;
+  degree7: boolean;
+  totalDegrees: number;
+}
+
 export interface WinnerHistoryDto {
   childName: string;
   date: string;

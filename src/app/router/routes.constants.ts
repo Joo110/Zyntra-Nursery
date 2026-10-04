@@ -22,8 +22,9 @@ export const ROUTES = {
   DEPARTURE: '/departure',
   EVALUATIONS: '/evaluations',
   EVALUATIONS_WINNERS: '/evaluations/winners',
+  EVALUATIONS_HISTORY: '/evaluations/history',
   SUBSCRIPTIONS: '/subscriptions',
-  CHILDREN_SUBSCRIPTION_INFO: '/children-subscription-info', // جديد
+  CHILDREN_SUBSCRIPTION_INFO: '/children-subscription-info',
   TREASURY: '/treasury',
   SALARIES: '/salaries',
   BUSES: '/buses',

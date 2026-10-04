@@ -9,7 +9,6 @@ import { MemberType } from '../../Salaries/types/enums.types';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
 import { Pagination } from '@/components/tables/Pagination';
 import { Select } from '@/components/forms/Select';
-import { Input } from '@/components/forms/Input';
 import { Button } from '@/components/common/Button';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { DangerConfirmModal } from '@/components/modals/DangerConfirmModal';
@@ -78,13 +77,7 @@ function LateBadge({ minutes }: { minutes: number }) {
   );
 }
 
-/**
- * حضور المعلمين والعمال — شاشة عامة غير مرتبطة بقسم (على عكس حضور الطلاب).
- * تستخدم Endpoint عام لتسجيل حضور أي عضو (POST /Attendance) و Endpoint عام لعرض السجل
- * حسب نوع العضو (GET /Attendance/history?memberType=Teacher|Worker).
- * ⚠️ لا يوجد حاليًا Endpoint مقابل لتسجيل "انصراف" عام لمعلم/عامل (فقط للطفل عبر قسم) —
- * راجع تقرير مشاكل الباك اند بخصوص هذه النقطة.
- */
+
 export function StaffAttendancePage() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -92,7 +85,6 @@ export function StaffAttendancePage() {
   const memberType = (searchParams.get('memberType') as MemberType) || MemberType.Teacher;
 
   const [selectedMemberId, setSelectedMemberId] = useState('');
-  const [lateMinutes, setLateMinutes] = useState('0');
   const [deleting, setDeleting] = useState<AttendanceHistoryDto | null>(null);
   const [deletingAll, setDeletingAll] = useState(false);
 
@@ -127,12 +119,11 @@ export function StaffAttendancePage() {
         memberType,
         date: now.toISOString(),
         time: now.toTimeString().slice(0, 5),
-        late: Number(lateMinutes) || 0,
+        late: 0,
       },
       {
         onSuccess: () => {
           setSelectedMemberId('');
-          setLateMinutes('0');
         },
       }
     );
@@ -198,16 +189,6 @@ export function StaffAttendancePage() {
                 <option key={m.id} value={m.id}>{m.name}</option>
               ))}
             </Select>
-          </div>
-          <div className="w-full max-w-[160px]">
-            <Input
-              type="number"
-              min={0}
-              className="ltr-numerals"
-              placeholder="دقائق التأخير"
-              value={lateMinutes}
-              onChange={(e) => setLateMinutes(e.target.value)}
-            />
           </div>
           <Button
             icon={<UserCheck className="h-4 w-4" />}

@@ -53,8 +53,8 @@ export interface ChildBasicInfoDto {
 }
 
 /**
- * مطابق تمامًا لـ AddChildDto — بما في ذلك الأخطاء الإملائية الأصلية بالـ Backend
- * (dateOfSubscraip, subscirptionAmount) والمحفوظة عمدًا هنا (راجع Master Prompt § 8 Types).
+ * مطابق لـ AddChildDto بعد إزالة سعر الاشتراك (subscirptionAmount) من الباك اند.
+ * الخطأ الإملائي الأصلي (dateOfSubscraip) محفوظ عمدًا.
  */
 export interface AddChildDto {
   name?: string | null;
@@ -68,7 +68,6 @@ export interface AddChildDto {
   gender: Gender;
   callPhoneNumber: string;
   period: Period;
-  subscirptionAmount: number;
   howYouKnowNursery: number;
   socialStatus?: number | null;
   messageNumber: string;

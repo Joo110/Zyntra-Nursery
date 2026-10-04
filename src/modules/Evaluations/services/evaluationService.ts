@@ -4,16 +4,43 @@ import type { Period } from '@/types/enums.types';
 import type {
   EvaluationInfoDto,
   EvaluationAverageDto,
+  EvaluationHistoryDto,
   WinnerHistoryDto,
   WinnerCardDto,
   UpdateDayEvaluationDto,
 } from '../types/evaluation.types';
+
+export interface EvaluationHistoryParams {
+  dateFrom: string;
+  dateTo: string;
+  classId?: string;
+  period?: Period;
+  pageNumber: number;
+  take: number;
+}
 
 export const evaluationService = {
   getInfo: (branchId: string, classId: string, period: Period, pageNumber: number, take: number) =>
     axiosInstance
       .get<PagedResult<EvaluationInfoDto>>(`/branches/${branchId}/Evaluations/info`, {
         params: { classId, period, pageNumber, take },
+      })
+      .then((res) => res.data),
+
+  /**
+   * ⚠️ الـ URL والـ params افتراضية — عدّلها لتطابق الـ action الفعلي في الكنترولر.
+   */
+  getHistory: (branchId: string, p: EvaluationHistoryParams) =>
+    axiosInstance
+      .get<PagedResult<EvaluationHistoryDto>>(`/branches/${branchId}/Evaluations/history`, {
+        params: {
+          dateFrom: p.dateFrom,
+          dateTo: p.dateTo,
+          classId: p.classId || undefined,
+          period: p.period,
+          pageNumber: p.pageNumber,
+          take: p.take,
+        },
       })
       .then((res) => res.data),
 

@@ -9,6 +9,7 @@ export interface ChildSubscriptionInfoDto {
 }
 
 export interface PaymentSubscriptionInfoDto {
+  subscriptionId?: string;
   gender: Gender;
   code: string;
   name: string;
@@ -18,7 +19,6 @@ export interface PaymentSubscriptionInfoDto {
   period: Period;
   amount: number;
 }
-
 export interface PaymentHistoryInfoDto {
   gender: Gender;
   code: string;

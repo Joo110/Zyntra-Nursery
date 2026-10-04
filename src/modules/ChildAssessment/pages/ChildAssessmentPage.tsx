@@ -14,10 +14,7 @@ import { useBranchStore } from '@/app/providers/branchStore';
 import { PageLoader } from '@/components/loading/PageLoader';
 import { Period, PeriodLabels } from '@/types/enums.types';
 
-/**
- * شاشة تقييم الطلاب (Child Assessment) — تستخدم ChildAssessmentController الجاهز بالكامل بالباك.
- * تدفّق الاستخدام: اختيار القسم → الفترة → الطالب → عرض تاريخ التقييمات + زرار تسجيل تقييم جديد.
- */
+
 export function ChildAssessmentPage() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id);
   const [departmentId, setDepartmentId] = useState('');

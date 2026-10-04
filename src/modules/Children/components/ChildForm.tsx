@@ -46,7 +46,6 @@ export function ChildForm({ branchId, initialData, onSubmit, isLoading, onCancel
       gender: initialData?.gender ?? Gender.male,
       callPhoneNumber: initialData?.callPhoneNumber ?? '',
       period: initialData?.period ?? Period.AM,
-      subscirptionAmount: initialData?.subscirptionAmount ?? 0,
       howYouKnowNursery: initialData?.howYouKnowNursery ?? 0,
       messageNumber: initialData?.messageNumber ?? '',
       email: initialData?.email ?? '',
@@ -150,7 +149,6 @@ export function ChildForm({ branchId, initialData, onSubmit, isLoading, onCancel
                 <BusDropdown branchId={branchId} value={field.value} onChange={field.onChange} />
               )}
             />
-        
           </FormField>
         </div>
       </section>
@@ -175,9 +173,6 @@ export function ChildForm({ branchId, initialData, onSubmit, isLoading, onCancel
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField label="تاريخ الاشتراك" required error={errors.dateOfSubscraip?.message} htmlFor="dateOfSubscraip">
             <DatePicker id="dateOfSubscraip" {...register('dateOfSubscraip')} error={errors.dateOfSubscraip?.message} />
-          </FormField>
-          <FormField label="مبلغ الاشتراك" required error={errors.subscirptionAmount?.message} htmlFor="subscirptionAmount">
-            <Input id="subscirptionAmount" type="number" step="0.01" className="ltr-numerals" {...register('subscirptionAmount')} error={errors.subscirptionAmount?.message} />
           </FormField>
         </div>
       </section>

@@ -9,15 +9,9 @@ import type {
 } from '../types/user.types';
 import type { MessageResponse } from '@/types/pagination.types';
 
-/**
- * طبقة الـ Service مسؤولة فقط عن نداءات الـ API — بدون أي UI Logic (راجع Master Prompt § Services).
- * راجع 02-API-Contract-Detailed.md § 18) User لكل تفاصيل الـ Endpoints.
- */
+
 export const userService = {
-  /**
-   * ⚠️ POST /api/User/login يستقبل userName/password كـ Query Params وليس Body
-   * (راجع BACKEND_ISSUES.md — قرار Backend موجود لا يمكن تغييره من الفرونت).
-   */
+
   login: (userName: string, password: string) =>
     axiosInstance
       .post<LoggedInStaffDto>('/User/login', null, { params: { userName, password } })
