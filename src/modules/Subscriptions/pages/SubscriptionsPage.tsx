@@ -1,26 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Plus, Wallet, Users, Banknote, HandCoins } from 'lucide-react';
+import { Wallet, Users, Banknote, HandCoins } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   useUnpaidSubscriptions,
-  useCreateSubscription,
   useUpdateSubscription,
   useDepartmentSubscriptionSummary,
 } from '../hooks/useSubscriptions';
 import { useGenerateMonthlySubscriptions } from '../hooks/useAutoGenerateSubscriptions';
-import { SubscriptionForm } from '../components/SubscriptionForm';
 import { PeriodSelector } from '../components/PeriodSelector';
 import { PayModal } from '../components/PayModal';
-import type { AddSubscriptionFormValues } from '../types/subscription.schema';
+import { PaymentHistoryTab } from '../components/PaymentHistoryTab';
 import type { PaymentSubscriptionInfoDto, UpdateSubscriptionDto } from '../types/subscription.types';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
 import { Pagination } from '@/components/tables/Pagination';
 import { DepartmentSelector } from '@/components/common/DepartmentSelector';
 import { GenderBadge } from '@/components/common/GenderBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
-import { Button } from '@/components/common/Button';
-import { Modal } from '@/components/modals/Modal';
 import { useBranchStore } from '@/app/providers/branchStore';
 import { PageLoader } from '@/components/loading/PageLoader';
 import { Period } from '@/types/enums.types';
@@ -40,8 +36,8 @@ export function SubscriptionsPage() {
   const pageNumber = Number(searchParams.get('page') ?? '1');
   const departmentId = searchParams.get('departmentId') ?? '';
   const period = Number(searchParams.get('period') ?? Period.AM) as Period;
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [payingRow, setPayingRow] = useState<PaymentSubscriptionInfoDto | null>(null);
+  const [tab, setTab] = useState<'unpaid' | 'history'>('unpaid');
 
   const { data, isLoading, isError } = useUnpaidSubscriptions(
     branchId ?? '',
@@ -55,7 +51,6 @@ export function SubscriptionsPage() {
     departmentId,
     period
   );
-  const createSubscription = useCreateSubscription(branchId ?? '');
   const updateSubscription = useUpdateSubscription(branchId ?? '');
 
   // ── الإنزال التلقائي لاشتراكات الشهر ──
@@ -85,19 +80,6 @@ export function SubscriptionsPage() {
     setSearchParams(params);
   };
 
-  const handleSubmit = async (values: AddSubscriptionFormValues): Promise<boolean> => {
-    try {
-      await createSubscription.mutateAsync({
-        ...values,
-        dateOfPayment: values.isPaid ? new Date().toISOString() : null,
-      });
-      if (!values.isPaid) setIsFormOpen(false);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   const openPay = (row: PaymentSubscriptionInfoDto) => {
     if (!getSubscriptionId(row)) {
       toast.error('الـ API لا يرجّع subscriptionId، لا يمكن تعديل هذا الاشتراك');
@@ -114,7 +96,11 @@ export function SubscriptionsPage() {
     { key: 'name', header: 'اسم الطالب' },
     { key: 'gender', header: 'النوع', render: (row) => <GenderBadge gender={row.gender} /> },
     { key: 'className', header: 'الفصل' },
-    { key: 'amount', header: 'المبلغ المستحق', render: (row) => <span className="ltr-numerals">{row.amount.toLocaleString('ar-EG')} ج.م</span> },
+    {
+      key: 'amount',
+      header: 'المبلغ المتبقي',
+      render: (row) => <span className="ltr-numerals">{row.amount.toLocaleString('ar-EG')} ج.م</span>,
+    },
     { key: 'status', header: 'الحالة', render: () => <StatusBadge status="unpaid" /> },
   ];
 
@@ -122,112 +108,131 @@ export function SubscriptionsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="flex items-center gap-2 text-xl font-bold text-neutral-900"><Wallet className="h-5 w-5" /> الاشتراكات</h1>
-          <p className="text-sm text-neutral-500">متابعة اشتراكات الطلاب غير المدفوعة وتسجيل الدفعات</p>
+          <h1 className="flex items-center gap-2 text-xl font-bold text-neutral-900">
+            <Wallet className="h-5 w-5" /> الاشتراكات
+          </h1>
+          <p className="text-sm text-neutral-500">
+            متابعة اشتراكات الطلاب غير المدفوعة، والدفع أو تعديل المبلغ المتبقي من خلال الصف
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            onClick={() => generate.mutate()}
-            disabled={generate.isPending}
+      </div>
+
+      <div className="flex gap-2 border-b border-neutral-200">
+        {([
+          ['unpaid', 'غير المدفوعة'],
+          ['history', 'سجل المدفوعات'],
+        ] as const).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setTab(key)}
+            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
+              tab === key
+                ? 'border-primary text-primary'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700'
+            }`}
           >
-            {generate.isPending ? 'جاري الإنزال...' : 'إنزال اشتراكات الشهر'}
-          </Button>
-          <Button icon={<Plus className="h-4 w-4" />} onClick={() => setIsFormOpen(true)}>تسجيل دفعة</Button>
-        </div>
+            {label}
+          </button>
+        ))}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="w-full max-w-xs">
-          <DepartmentSelector branchId={branchId} value={departmentId} onChange={(v) => updateParams({ departmentId: v })} />
-        </div>
-        <PeriodSelector value={period} onChange={(p) => updateParams({ period: String(p) })} />
-      </div>
+      {tab === 'history' ? (
+        <PaymentHistoryTab />
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="w-full max-w-xs">
+              <DepartmentSelector
+                branchId={branchId}
+                value={departmentId}
+                onChange={(v) => updateParams({ departmentId: v })}
+              />
+            </div>
+            <PeriodSelector value={period} onChange={(p) => updateParams({ period: String(p) })} />
+          </div>
 
-      {departmentId && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-4">
-          {isSummaryLoading ? (
-            <p className="text-sm text-neutral-500">جاري تحميل ملخص القسم...</p>
-          ) : summary ? (
-            <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="flex items-center gap-3 rounded-lg bg-neutral-50 p-3">
-                  <Users className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-xs text-neutral-500">عدد الطلاب</p>
-                    <p className="text-lg font-bold text-neutral-900 ltr-numerals">
-                      {summary.studentsCount.toLocaleString('ar-EG')}
-                    </p>
+          {departmentId && (
+            <div className="rounded-xl border border-neutral-200 bg-white p-4">
+              {isSummaryLoading ? (
+                <p className="text-sm text-neutral-500">جاري تحميل ملخص القسم...</p>
+              ) : summary ? (
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="flex items-center gap-3 rounded-lg bg-neutral-50 p-3">
+                      <Users className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-xs text-neutral-500">عدد الطلاب</p>
+                        <p className="text-lg font-bold text-neutral-900 ltr-numerals">
+                          {summary.studentsCount.toLocaleString('ar-EG')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 rounded-lg bg-neutral-50 p-3">
+                      <Banknote className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-xs text-neutral-500">إجمالي المتبقي</p>
+                        <p className="text-lg font-bold text-neutral-900 ltr-numerals">
+                          {summary.totalAmount.toLocaleString('ar-EG')} ج.م
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-lg bg-neutral-50 p-3">
-                  <Banknote className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-xs text-neutral-500">إجمالي الاشتراكات</p>
-                    <p className="text-lg font-bold text-neutral-900 ltr-numerals">
-                      {summary.totalAmount.toLocaleString('ar-EG')} ج.م
-                    </p>
-                  </div>
-                </div>
-              </div>
 
-              {summary.students.length > 0 && (
-                <details className="text-sm">
-                  <summary className="cursor-pointer font-semibold text-neutral-700">
-                    أسماء طلاب القسم ({summary.students.length.toLocaleString('ar-EG')})
-                  </summary>
-                  <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3">
-                    {summary.students.map((s) => (
-                      <li key={s.id} className="rounded-md bg-neutral-50 px-2 py-1 text-neutral-700">
-                        {s.name}
-                      </li>
-                    ))}
-                  </ul>
-                </details>
+                  {summary.students.length > 0 && (
+                    <details className="text-sm">
+                      <summary className="cursor-pointer font-semibold text-neutral-700">
+                        أسماء طلاب القسم ({summary.students.length.toLocaleString('ar-EG')})
+                      </summary>
+                      <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3">
+                        {summary.students.map((s) => (
+                          <li key={s.id} className="rounded-md bg-neutral-50 px-2 py-1 text-neutral-700">
+                            {s.name}
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-neutral-500">تعذّر تحميل ملخص القسم</p>
               )}
             </div>
-          ) : (
-            <p className="text-sm text-neutral-500">تعذّر تحميل ملخص القسم</p>
           )}
-        </div>
+
+          <div>
+            <DataTable
+              columns={columns}
+              data={data?.items ?? []}
+              isLoading={isLoading}
+              isError={isError}
+              getRowId={(row, i) => `${row.code}-${i}`}
+              emptyMessage="لا يوجد اشتراكات غير مدفوعة حاليًا"
+              rowActions={(row) => (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openPay(row);
+                  }}
+                  className="flex items-center gap-1 rounded-md bg-primary px-2.5 py-1.5 text-xs font-medium text-white hover:opacity-90"
+                  aria-label="دفع أو تعديل المبلغ المتبقي"
+                >
+                  <HandCoins className="h-4 w-4" /> دفع / تعديل المتبقي
+                </button>
+              )}
+            />
+            {data && (
+              <Pagination
+                pageNumber={data.pageNumber}
+                totalPages={data.totalPages}
+                hasNextPage={data.hasNextPage}
+                hasPreviousPage={data.hasPreviousPage}
+                totalCount={data.totalCount}
+                onPageChange={(p) => updateParams({ page: String(p) })}
+              />
+            )}
+          </div>
+        </>
       )}
-
-      <div>
-        <DataTable
-          columns={columns}
-          data={data?.items ?? []}
-          isLoading={isLoading}
-          isError={isError}
-          getRowId={(row, i) => `${row.code}-${i}`}
-          emptyMessage="لا يوجد اشتراكات غير مدفوعة حاليًا"
-          rowActions={(row) => (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                openPay(row);
-              }}
-              className="flex items-center gap-1 rounded-md bg-primary px-2.5 py-1.5 text-xs font-medium text-white hover:opacity-90"
-              aria-label="دفع أو تعديل"
-            >
-              <HandCoins className="h-4 w-4" /> دفع / تعديل
-            </button>
-          )}
-        />
-        {data && (
-          <Pagination pageNumber={data.pageNumber} totalPages={data.totalPages} hasNextPage={data.hasNextPage} hasPreviousPage={data.hasPreviousPage} totalCount={data.totalCount} onPageChange={(p) => updateParams({ page: String(p) })} />
-        )}
-      </div>
-
-      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title="تسجيل دفعة اشتراك">
-        <SubscriptionForm
-          branchId={branchId}
-          departmentId={departmentId}
-          period={period}
-          onSubmit={handleSubmit}
-          isLoading={createSubscription.isPending}
-          onCancel={() => setIsFormOpen(false)}
-        />
-      </Modal>
 
       <PayModal
         row={payingRow}

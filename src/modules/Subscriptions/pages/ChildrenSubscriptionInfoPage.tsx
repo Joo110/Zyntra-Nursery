@@ -49,6 +49,15 @@ export function ChildrenSubscriptionInfoPage() {
     { key: 'name', header: 'اسم الطالب' },
     { key: 'gender', header: 'النوع', render: (row) => <GenderBadge gender={row.gender} /> },
     { key: 'className', header: 'الفصل' },
+    {
+      key: 'subscriptionAmount',
+      header: 'مبلغ الاشتراك',
+      render: (row) => (
+        <span className="ltr-numerals">
+          {(row.subscriptionAmount ?? 0).toLocaleString('ar-EG')} ج.م
+        </span>
+      ),
+    },
   ];
 
   return (

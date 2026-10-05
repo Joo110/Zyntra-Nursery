@@ -7,6 +7,7 @@ export interface EmployeeSalaryDto {
   employeeName: string | null;
   amount: number;
   salaryMonth: string;
+  isPaid: boolean;
 }
 
 /** مطابق لـ SalaryReceiptDto */

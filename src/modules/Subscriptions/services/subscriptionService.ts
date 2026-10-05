@@ -29,16 +29,26 @@ export const subscriptionService = {
       })
       .then((res) => res.data),
 
-  /**
-   * ⚠️ الـ URL افتراضي — عدّله ليطابق الـ endpoint اللي ضفته في DepartmentController.
-   */
-  getDepartmentSummary: (branchId: string, departmentId: string, period: Period) =>
-    axiosInstance
-      .get<DepartmentSubscriptionSummaryDto>(
-        `/branches/${branchId}/Departments/${departmentId}/subscription-summary`,
-        { params: { period } }
-      )
-      .then((res) => res.data),
+
+      
+  getDepartmentSummary: async (
+    branchId: string,
+    departmentId: string,
+    period: Period
+  ): Promise<DepartmentSubscriptionSummaryDto> => {
+    const res = await axiosInstance.get<PagedResult<PaymentSubscriptionInfoDto>>(
+      `/branches/${branchId}/Subscriptions/unpaid-subscriptions`,
+      { params: { period, pageNumber: 1, take: 1000, departmentId } }
+    );
+
+    const items = res.data.items ?? [];
+
+    return {
+      studentsCount: items.length,
+      totalAmount: items.reduce((sum, i) => sum + (i.amount ?? 0), 0),
+      students: items.map((i) => ({ id: i.subscriptionId ?? i.code, name: i.name })),
+    };
+  },
 
   getPaymentHistoryByChild: (branchId: string, childId: string, pageNumber: number, take: number) =>
     axiosInstance

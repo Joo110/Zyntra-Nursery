@@ -137,7 +137,6 @@ export function DeparturePage() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <StatCard icon={<ClipboardList className="h-5 w-5" />} label="إجمالي سجلات الانصراف" value={data.totalCount} />
           <StatCard icon={<Users className="h-5 w-5" />} label="طلاب متبقّون لم ينصرفوا" value={availableChildren.length} />
-          <StatCard icon={<LogOut className="h-5 w-5" />} label="عدد الصفحات" value={data.totalPages} />
         </div>
       )}
 

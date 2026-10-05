@@ -84,13 +84,24 @@ export function SalariesPage() {
     {
       key: 'amount',
       header: 'المبلغ',
-      render: (row) => <span className="ltr-numerals">{row.amount.toLocaleString('ar-EG')}</span>,
+      render: (row) => (
+        <span className="ltr-numerals">{(row.amount ?? 0).toLocaleString('ar-EG')} ج.م</span>
+      ),
     },
     {
       key: 'salaryMonth',
       header: 'الشهر',
       render: (row) =>
         new Date(row.salaryMonth).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' }),
+    },
+    {
+      key: 'isPaid',
+      header: 'الحالة',
+      render: (row) => (
+        <span className={row.isPaid ? 'text-green-600' : 'text-red-600'}>
+          {row.isPaid ? 'مدفوع' : 'غير مدفوع'}
+        </span>
+      ),
     },
   ];
 
