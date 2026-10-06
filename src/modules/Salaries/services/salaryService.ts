@@ -1,9 +1,13 @@
 import { axiosInstance } from '@/services/api/axiosInstance';
 import type { MessageResponse } from '@/types/pagination.types';
 import { MemberTypeBodyValue, MemberTypeQueryName, type MemberType } from '../../Salaries/types/enums.types';
-import type { EmployeeSalaryDto, SalaryReceiptDto, AddSalaryDto, UpdateSalaryDto } from '../types/salary.types';
-import type { EmployeeBaseSalaryDto } from '../types/salary.types';
-
+import type {
+  EmployeeSalaryDto,
+  SalaryReceiptDto,
+  AddSalaryDto,
+  UpdateSalaryDto,
+  EmployeeBaseSalaryDto,
+} from '../types/salary.types';
 
 export const salaryService = {
   getReceipt: (branchId: string, salaryId: string) =>
@@ -25,7 +29,7 @@ export const salaryService = {
       })
       .then((res) => res.data),
 
-        getBaseSalary: (branchId: string, type: MemberType, employeeId: string) =>
+  getBaseSalary: (branchId: string, type: MemberType, employeeId: string) =>
     axiosInstance
       .get<EmployeeBaseSalaryDto>(`/branches/${branchId}/Salaries/base-salary`, {
         params: { type: MemberTypeQueryName[type], employeeId },
@@ -52,6 +56,19 @@ export const salaryService = {
       .put<MessageResponse>(`/branches/${branchId}/Salaries`, {
         ...dto,
         employeeType: MemberTypeBodyValue[dto.employeeType],
+      })
+      .then((res) => res.data),
+
+  pay: (branchId: string, salary: EmployeeSalaryDto, type: MemberType) =>
+    axiosInstance
+      .put<MessageResponse>(`/branches/${branchId}/Salaries`, {
+        id: salary.id,
+        employeeId: salary.employeeId,
+        branchId,
+        employeeType: MemberTypeBodyValue[type],
+        amount: salary.amount,
+        salaryMonth: salary.salaryMonth,
+        isPaid: true,
       })
       .then((res) => res.data),
 

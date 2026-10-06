@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { salaryService } from '../services/salaryService';
-import type { AddSalaryDto, UpdateSalaryDto } from '../types/salary.types';
+import type { AddSalaryDto, UpdateSalaryDto, EmployeeSalaryDto } from '../types/salary.types';
 import type { ApiError } from '@/types/api-error.types';
 import type { MemberType } from '@/types/enums.types';
 
@@ -15,7 +15,6 @@ export const salaryKeys = {
     [...salaryKeys.all, 'receipts-range', branchId, { dateFrom, dateTo, type }] as const,
 };
 
-/** راجع 05-Caching...md نمط عام: قوائم مالية شهرية staleTime = 30 ثانية */
 export function useSalariesList(branchId: string, type: MemberType) {
   return useQuery({
     queryKey: salaryKeys.list(branchId, type),
@@ -76,7 +75,20 @@ export function useEmployeeBaseSalary(
     queryKey: [...salaryKeys.all, 'base-salary', branchId, type, employeeId],
     queryFn: () => salaryService.getBaseSalary(branchId, type as MemberType, employeeId as string),
     enabled: !!branchId && !!type && !!employeeId,
-    staleTime: 0, // نحتاج قيمة فريش دايمًا وقت الاختيار
+    staleTime: 0,
+  });
+}
+
+export function usePaySalary(branchId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ salary, type }: { salary: EmployeeSalaryDto; type: MemberType }) =>
+      salaryService.pay(branchId, salary, type),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: salaryKeys.all });
+      toast.success('تم دفع الراتب بنجاح');
+    },
+    onError: (e: ApiError) => toast.error(e.message),
   });
 }
 

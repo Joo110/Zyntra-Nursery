@@ -34,12 +34,12 @@ export function ChildCreatePage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       <div>
-        <h1 className="text-xl font-bold text-neutral-900">إضافة طالب جديد</h1>
+        <h1 className="text-lg font-bold text-neutral-900 sm:text-xl">إضافة طالب جديد</h1>
         <p className="text-sm text-neutral-500">أدخل بيانات الطالب الجديد</p>
       </div>
-      <Card className="max-w-3xl p-6">
+      <Card className="w-full max-w-3xl p-4 sm:p-6">
         <ChildForm
           branchId={branchId}
           onSubmit={handleSubmit}

@@ -1,4 +1,3 @@
-
 export const Period = {
   AM: 0,
   PM: 1,
@@ -70,13 +69,20 @@ export const MemberTypeLabels: Record<MemberType, string> = {
 
 export const UserRoleLabels: Record<UserRole, string> = {
   [UserRole.Admin]: 'مدير النظام',
-  [UserRole.Manager]: 'مدير',
+  [UserRole.Manager]: 'المدير',
   [UserRole.Specialist]: 'أخصائي',
-  [UserRole.Teacher]: 'معلم',
-  [UserRole.Staff]: 'موظف',
-  [UserRole.Accountant]: 'محاسب',
+  [UserRole.Teacher]: 'المدرس',
+  [UserRole.Staff]: 'المضيفة',
+  [UserRole.Accountant]: 'المحاسب',
   [UserRole.Driver]: 'سائق',
 };
+
+export const AssignableUserRoles: UserRole[] = [
+  UserRole.Manager,
+  UserRole.Accountant,
+  UserRole.Teacher,
+  UserRole.Staff,
+];
 
 export const TrunsactionTypeLabels: Record<TrunsactionType, string> = {
   [TrunsactionType.Income]: 'دخل',

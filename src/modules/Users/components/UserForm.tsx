@@ -5,7 +5,7 @@ import { Input } from '@/components/forms/Input';
 import { Select } from '@/components/forms/Select';
 import { FormField } from '@/components/forms/FormField';
 import { Button } from '@/components/common/Button';
-import { Gender, GenderLabels, UserRole, UserRoleLabels } from '@/types/enums.types';
+import { Gender, GenderLabels, UserRole, UserRoleLabels, AssignableUserRoles } from '@/types/enums.types';
 
 interface Props {
   onSubmit: (values: AddUserFormValues) => void;
@@ -32,8 +32,8 @@ export function UserForm({ onSubmit, isLoading, onCancel }: Props) {
       </FormField>
       <FormField label="الدور الوظيفي" required htmlFor="role">
         <Select id="role" {...register('role')}>
-          {Object.values(UserRole).filter((v) => typeof v === 'number').map((r) => (
-            <option key={r} value={r}>{UserRoleLabels[r as UserRole]}</option>
+          {AssignableUserRoles.map((r) => (
+            <option key={r} value={r}>{UserRoleLabels[r]}</option>
           ))}
         </Select>
       </FormField>

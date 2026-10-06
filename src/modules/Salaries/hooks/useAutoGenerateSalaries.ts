@@ -4,9 +4,8 @@ import { salaryService } from '../services/salaryService';
 import { salaryKeys } from './useSalaries';
 import { MemberType } from '../types/enums.types';
 
-const TYPES = [MemberType.Teacher, MemberType.Worker] as const; // عدّل حسب الـ enum عندك
+const TYPES = [MemberType.Teacher, MemberType.Worker] as const;
 
-/** وصّلها بالـ services بتاعة المعلمين والعاملين */
 export type LoadEmployees = (type: MemberType) => Promise<{ id: string }[]>;
 
 const monthKey = (iso: string) => iso.slice(0, 7);
@@ -34,7 +33,6 @@ export async function generateMonthlySalaries(branchId: string, loadEmployees: L
     total += employees.length;
     if (employees.length === 0) continue;
 
-    // اللي له راتب الشهر ده فعلًا
     const existing = await salaryService.getList(branchId, type);
     const alreadyHave = new Set(
       existing.filter((s) => monthKey(s.salaryMonth) === currentMonth).map((s) => s.employeeId)

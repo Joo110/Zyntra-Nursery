@@ -1,6 +1,5 @@
 import type { MemberType } from '@/types/enums.types';
 
-/** مطابق لـ SalariesService.EmployeeSalaryDto */
 export interface EmployeeSalaryDto {
   id: string;
   employeeId: string;
@@ -10,7 +9,6 @@ export interface EmployeeSalaryDto {
   isPaid: boolean;
 }
 
-/** مطابق لـ SalaryReceiptDto */
 export interface SalaryReceiptDto {
   salaryId: string;
   employeeId: string;
@@ -28,10 +26,6 @@ export interface EmployeeBaseSalaryDto {
   amount: number;
 }
 
-/**
- * مطابق لـ EmployeeSalary Entity — الباك بياخد الـ Entity مباشرة في POST/PUT
- * (راجع SalariesController.AddSalaryAsync/UpdateSalaryAsync) بدل DTO منفصل.
- */
 export interface AddSalaryDto {
   employeeId: string;
   branchId: string;

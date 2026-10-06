@@ -67,24 +67,36 @@ export function ChildrenPage() {
     { key: 'gender', header: 'النوع', render: (row) => <GenderBadge gender={row.gender} /> },
     { key: 'level', header: 'المستوى', render: (row) => row.level || '—' },
     { key: 'class', header: 'الفصل', render: (row) => row.class || '—' },
-    { key: 'callPhoneNumber', header: 'رقم التواصل', render: (row) => <span className="ltr-numerals">{row.callPhoneNumber || '—'}</span> },
+    {
+      key: 'callPhoneNumber',
+      header: 'رقم التواصل',
+      render: (row) => <span className="ltr-numerals">{row.callPhoneNumber || '—'}</span>,
+    },
   ];
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="flex flex-col items-start justify-between gap-3 lg:flex-row lg:items-center">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900">الطلاب</h1>
+          <h1 className="text-lg font-bold text-neutral-900 sm:text-xl">الطلاب</h1>
           <p className="text-sm text-neutral-500">إدارة طلاب الفرع المختار</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex w-full flex-wrap gap-2 lg:w-auto">
           <Button variant="outline" icon={<Printer className="h-4 w-4" />} onClick={handlePrint}>
             طباعة تقرير
           </Button>
-          <Button variant="outline" icon={<Cake className="h-4 w-4" />} onClick={() => navigate(ROUTES.CHILDREN_BIRTHDAYS)}>
+          <Button
+            variant="outline"
+            icon={<Cake className="h-4 w-4" />}
+            onClick={() => navigate(ROUTES.CHILDREN_BIRTHDAYS)}
+          >
             أعياد الميلاد
           </Button>
-          <Button variant="outline" icon={<Archive className="h-4 w-4" />} onClick={() => navigate(ROUTES.CHILDREN_ARCHIVE)}>
+          <Button
+            variant="outline"
+            icon={<Archive className="h-4 w-4" />}
+            onClick={() => navigate(ROUTES.CHILDREN_ARCHIVE)}
+          >
             الأرشيف
           </Button>
           <Button icon={<Plus className="h-4 w-4" />} onClick={() => navigate(ROUTES.CHILDREN_CREATE)}>
@@ -93,62 +105,95 @@ export function ChildrenPage() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="w-full max-w-xs">
-          <DepartmentSelector branchId={branchId} value={departmentId} onChange={(v) => updateParams({ departmentId: v, page: '1' })} />
+      <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
+        <div className="w-full md:max-w-xs">
+          <DepartmentSelector
+            branchId={branchId}
+            value={departmentId}
+            onChange={(v) => updateParams({ departmentId: v, page: '1' })}
+          />
         </div>
-        <PeriodSelector value={period} onChange={(p) => updateParams({ period: String(p), page: '1' })} />
-        <SearchInput
-          value={searchInput}
-          onChange={(v) => { setSearchInput(v); updateParams({ search: v, page: '1' }); }}
-          placeholder="بحث باسم الطالب..."
-        />
+        <div className="w-full overflow-x-auto md:w-auto">
+          <PeriodSelector value={period} onChange={(p) => updateParams({ period: String(p), page: '1' })} />
+        </div>
+        <div className="w-full md:max-w-xs md:flex-1">
+          <SearchInput
+            value={searchInput}
+            onChange={(v) => {
+              setSearchInput(v);
+              updateParams({ search: v, page: '1' });
+            }}
+            placeholder="بحث باسم الطالب..."
+          />
+        </div>
       </div>
 
       {!departmentId ? (
-        <div className="rounded-lg border border-dashed border-neutral-300 bg-surface p-10 text-center text-sm text-neutral-500">
+        <div className="rounded-lg border border-dashed border-neutral-300 bg-surface p-6 text-center text-sm text-neutral-500 sm:p-10">
           برجاء اختيار قسم لعرض الطلاب
         </div>
       ) : (
-        <div>
-          <DataTable
-            columns={columns}
-            data={data?.items ?? []}
-            isLoading={isLoading}
-            isError={isError}
-            getRowId={(row) => row.id}
-            onRowClick={(row) => setViewingId(row.id)}
-            emptyMessage="لا يوجد طلاب حاليًا"
-            emptyActionLabel="إضافة طالب"
-            onEmptyAction={() => navigate(ROUTES.CHILDREN_CREATE)}
-            rowActions={(row) => (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={(e) => { e.stopPropagation(); navigate(ROUTES.childEdit(row.id), { state: { child: row } }); }}
-                  className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-primary"
-                  aria-label="تعديل"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setArchiving(row); }}
-                  className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-warning"
-                  aria-label="أرشفة"
-                >
-                  <Archive className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setDeleting(row); }}
-                  className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-danger"
-                  aria-label="حذف"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          />
+        <div className="flex flex-col gap-3">
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-[640px]">
+              <DataTable
+                columns={columns}
+                data={data?.items ?? []}
+                isLoading={isLoading}
+                isError={isError}
+                getRowId={(row) => row.id}
+                onRowClick={(row) => setViewingId(row.id)}
+                emptyMessage="لا يوجد طلاب حاليًا"
+                emptyActionLabel="إضافة طالب"
+                onEmptyAction={() => navigate(ROUTES.CHILDREN_CREATE)}
+                rowActions={(row) => (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(ROUTES.childEdit(row.id), { state: { child: row } });
+                      }}
+                      className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-primary"
+                      aria-label="تعديل"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setArchiving(row);
+                      }}
+                      className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-warning"
+                      aria-label="أرشفة"
+                    >
+                      <Archive className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleting(row);
+                      }}
+                      className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-danger"
+                      aria-label="حذف"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              />
+            </div>
+          </div>
           {data && (
-            <Pagination pageNumber={data.pageNumber} totalPages={data.totalPages} hasNextPage={data.hasNextPage} hasPreviousPage={data.hasPreviousPage} totalCount={data.totalCount} onPageChange={(p) => updateParams({ page: String(p) })} />
+            <div className="w-full overflow-x-auto">
+              <Pagination
+                pageNumber={data.pageNumber}
+                totalPages={data.totalPages}
+                hasNextPage={data.hasNextPage}
+                hasPreviousPage={data.hasPreviousPage}
+                totalCount={data.totalCount}
+                onPageChange={(p) => updateParams({ page: String(p) })}
+              />
+            </div>
           )}
         </div>
       )}
@@ -158,7 +203,9 @@ export function ChildrenPage() {
       <ConfirmModal
         isOpen={!!archiving}
         onClose={() => setArchiving(null)}
-        onConfirm={() => archiving && setActive.mutate({ id: archiving.id, isActive: false }, { onSuccess: () => setArchiving(null) })}
+        onConfirm={() =>
+          archiving && setActive.mutate({ id: archiving.id, isActive: false }, { onSuccess: () => setArchiving(null) })
+        }
         title="أرشفة الطالب"
         message={`هل أنت متأكد أنك تريد أرشفة الطالب "${archiving?.name}"؟ يمكنك استرجاعه لاحقًا من الأرشيف.`}
         confirmLabel="أرشفة"

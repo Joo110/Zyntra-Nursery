@@ -1,21 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, Receipt, Trash2 } from 'lucide-react';
-import { useSalariesList, useDeleteSalary, useCreateSalary } from '../hooks/useSalaries';
+import { Receipt, Trash2, Wallet } from 'lucide-react';
+import { useSalariesList, useDeleteSalary, usePaySalary } from '../hooks/useSalaries';
 import { useGenerateMonthlySalaries, type LoadEmployees } from '../hooks/useAutoGenerateSalaries';
-import { SalaryForm } from '../components/SalaryForm';
 import { SalaryReceiptModal } from '../components/SalaryReceiptModal';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
-import { Button } from '@/components/common/Button';
-import { Modal } from '@/components/modals/Modal';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { useBranchStore } from '@/app/providers/branchStore';
 import { PageLoader } from '@/components/loading/PageLoader';
 import { MemberType, MemberTypeLabels } from '../types/enums.types';
 import type { EmployeeSalaryDto } from '../types/salary.types';
-import type { AddSalaryFormValues } from '../types/salary.schema';
 import type { PagedResult } from '@/types/pagination.types';
 import { teacherService } from '@/modules/Teachers/services/teacherService';
 import { workerService } from '@/modules/Workers/services/workerService';
+import { PayConfirmModal } from '../components/PayConfirmModal';
 
 const EMP_TAKE = 100;
 
@@ -28,19 +25,20 @@ async function fetchAllPages<T>(fetchPage: (page: number) => Promise<PagedResult
   return all;
 }
 
+const fmt = (n: number) => `${(n ?? 0).toLocaleString('ar-EG')} ج.م`;
+
 export function SalariesPage() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id);
   const [type, setType] = useState<MemberType>(MemberType.Teacher);
 
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [deleting, setDeleting] = useState<EmployeeSalaryDto | null>(null);
+  const [paying, setPaying] = useState<EmployeeSalaryDto | null>(null);
   const [viewingReceiptId, setViewingReceiptId] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useSalariesList(branchId ?? '', type);
-  const createSalary = useCreateSalary(branchId ?? '');
   const deleteSalary = useDeleteSalary(branchId ?? '');
+  const paySalary = usePaySalary(branchId ?? '');
 
-  // ── الإنزال التلقائي لرواتب الشهر ──
   const loadEmployees: LoadEmployees = async (t) => {
     if (!branchId) return [];
     if (t === MemberType.Teacher) {
@@ -59,34 +57,23 @@ export function SalariesPage() {
     if (!branchId || autoRan.current) return;
     const now = new Date();
     const flagKey = `salaries-generated:${branchId}:${now.getFullYear()}-${now.getMonth() + 1}`;
-    if (localStorage.getItem(flagKey)) return; // اتعمل الشهر ده من الجهاز ده
+    if (localStorage.getItem(flagKey)) return;
     autoRan.current = true;
     generate.mutate(undefined, {
       onSuccess: ({ total, failed }) => {
-        // مش بنحفظ العلامة لو مفيش موظفين أو لو فيه فشل، عشان يحاول تاني
         if (total > 0 && failed === 0) localStorage.setItem(flagKey, '1');
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [branchId]);
 
   if (!branchId) return <PageLoader label="برجاء اختيار فرع أولًا..." />;
-
-  const handleFormSubmit = (values: AddSalaryFormValues) => {
-    createSalary.mutate(
-      { ...values, branchId },
-      { onSuccess: () => setIsFormOpen(false) }
-    );
-  };
 
   const columns: ColumnDef<EmployeeSalaryDto>[] = [
     { key: 'employeeName', header: 'الاسم', render: (row) => row.employeeName ?? '—' },
     {
       key: 'amount',
       header: 'المبلغ',
-      render: (row) => (
-        <span className="ltr-numerals">{(row.amount ?? 0).toLocaleString('ar-EG')} ج.م</span>
-      ),
+      render: (row) => <span className="ltr-numerals">{fmt(row.amount)}</span>,
     },
     {
       key: 'salaryMonth',
@@ -107,23 +94,11 @@ export function SalariesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-xl font-bold text-neutral-900">الرواتب</h1>
-          <p className="text-sm text-neutral-500">إدارة رواتب المعلمين والعاملين</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            onClick={() => generate.mutate()}
-            disabled={generate.isPending}
-          >
-            {generate.isPending ? 'جاري الإنزال...' : 'إنزال رواتب الشهر'}
-          </Button>
-          <Button icon={<Plus className="h-4 w-4" />} onClick={() => setIsFormOpen(true)}>
-            إضافة راتب
-          </Button>
-        </div>
+      <div>
+        <h1 className="text-xl font-bold text-neutral-900">الرواتب</h1>
+        <p className="text-sm text-neutral-500">
+          {generate.isPending ? 'جاري إنزال رواتب الشهر...' : 'إدارة رواتب المعلمين والعاملين'}
+        </p>
       </div>
 
       <div className="flex items-center gap-2">
@@ -147,15 +122,25 @@ export function SalariesPage() {
       <DataTable
         columns={columns}
         data={data ?? []}
-        isLoading={isLoading}
+        isLoading={isLoading || generate.isPending}
         isError={isError}
         getRowId={(row) => row.id}
         onRowClick={(row) => setViewingReceiptId(row.id)}
         emptyMessage="لا توجد رواتب مسجلة حاليًا"
-        emptyActionLabel="إضافة راتب"
-        onEmptyAction={() => setIsFormOpen(true)}
         rowActions={(row) => (
           <div className="flex items-center gap-1">
+            {!row.isPaid && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPaying(row);
+                }}
+                className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-green-600"
+                aria-label="دفع"
+              >
+                <Wallet className="h-4 w-4" />
+              </button>
+            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -180,16 +165,21 @@ export function SalariesPage() {
         )}
       />
 
-      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title="إضافة راتب جديد" size="lg">
-        <SalaryForm
-          branchId={branchId}
-          onSubmit={handleFormSubmit}
-          isLoading={createSalary.isPending}
-          onCancel={() => setIsFormOpen(false)}
-        />
-      </Modal>
+          <PayConfirmModal
+        isOpen={!!paying}
+        onClose={() => setPaying(null)}
+        onConfirm={() =>
+          paying && paySalary.mutate({ salary: paying, type }, { onSuccess: () => setPaying(null) })
+        }
+        message={`هل تريد تأكيد دفع راتب "${paying?.employeeName}" بمبلغ ${fmt(paying?.amount ?? 0)}؟`}
+        isLoading={paySalary.isPending}
+      />
 
-      <SalaryReceiptModal branchId={branchId} salaryId={viewingReceiptId} onClose={() => setViewingReceiptId(null)} />
+      <SalaryReceiptModal
+        branchId={branchId}
+        salaryId={viewingReceiptId}
+        onClose={() => setViewingReceiptId(null)}
+      />
 
       <ConfirmModal
         isOpen={!!deleting}
