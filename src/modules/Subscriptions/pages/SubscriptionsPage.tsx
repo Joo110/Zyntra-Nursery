@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Wallet, Users, Banknote, HandCoins } from 'lucide-react';
 import { toast } from 'sonner';
@@ -7,7 +7,6 @@ import {
   useUpdateSubscription,
   useDepartmentSubscriptionSummary,
 } from '../hooks/useSubscriptions';
-import { useGenerateMonthlySubscriptions } from '../hooks/useAutoGenerateSubscriptions';
 import { PeriodSelector } from '../components/PeriodSelector';
 import { PayModal } from '../components/PayModal';
 import { PaymentHistoryTab } from '../components/PaymentHistoryTab';
@@ -51,22 +50,6 @@ export function SubscriptionsPage() {
     period
   );
   const updateSubscription = useUpdateSubscription(branchId ?? '');
-
-  const generate = useGenerateMonthlySubscriptions(branchId ?? '');
-  const autoRan = useRef(false);
-
-  useEffect(() => {
-    if (!branchId || autoRan.current) return;
-    const now = new Date();
-    const flagKey = `subs-generated:${branchId}:${now.getFullYear()}-${now.getMonth() + 1}`;
-    if (localStorage.getItem(flagKey)) return;
-    autoRan.current = true;
-    generate.mutate(undefined, {
-      onSuccess: ({ total, failed }) => {
-        if (total > 0 && failed === 0) localStorage.setItem(flagKey, '1');
-      },
-    });
-  }, [branchId]);
 
   if (!branchId) return <PageLoader label="برجاء اختيار فرع أولًا..." />;
 

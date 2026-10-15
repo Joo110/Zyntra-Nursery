@@ -110,9 +110,6 @@ export function EvaluationsPage() {
           <Button variant="secondary" size="sm" icon={<Trophy className="h-4 w-4" />} onClick={() => setSavingWinners(true)}>
             حفظ فائزي اليوم
           </Button>
-          <Button variant="danger" size="sm" icon={<RotateCcw className="h-4 w-4" />} onClick={() => setResetting(true)}>
-            تصفير تقييم اليوم
-          </Button>
         </div>
       </div>
 
