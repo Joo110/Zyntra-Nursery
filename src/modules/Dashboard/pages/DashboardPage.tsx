@@ -29,10 +29,6 @@ import { userService } from '@/modules/Users/services/userService';
 import { attendanceService } from '@/modules/Attendance/services/attendanceService';
 import { MemberType } from '@/types/enums.types';
 
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
-
 function formatMoney(value: number | undefined | null) {
   if (value === undefined || value === null || Number.isNaN(value)) return '—';
   return new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(value);
@@ -88,10 +84,6 @@ function SectionHeader({ title, action }: { title: string; action?: React.ReactN
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Dashboard Page                                                     */
-/* ------------------------------------------------------------------ */
-
 export function DashboardPage() {
   const user = useAuthStore((s) => s.user);
   const branchId = useBranchStore((s) => s.selectedBranch?.id ?? '');
@@ -99,8 +91,6 @@ export function DashboardPage() {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
-
-  /* -------------------- Data fetching -------------------- */
 
   const childrenAmCount = useQuery({
     queryKey: ['dashboard', 'children-count', branchId, Period.AM],
@@ -164,8 +154,6 @@ export function DashboardPage() {
     staleTime: 0,
   });
 
-  /* -------------------- Derived values -------------------- */
-
   const totalChildren = (childrenAmCount.data ?? 0) + (childrenPmCount.data ?? 0);
   const totalUnpaid = (unpaidAm.data?.totalCount ?? 0) + (unpaidPm.data?.totalCount ?? 0);
 
@@ -194,7 +182,6 @@ export function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-neutral-900">
           مرحبًا{user ? `، ${user.userName}` : ''} 👋
@@ -202,7 +189,6 @@ export function DashboardPage() {
         <p className="text-sm text-neutral-500">نظرة عامة على نظام إدارة الحضانة</p>
       </div>
 
-      {/* Top stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={Users}
@@ -238,7 +224,6 @@ export function DashboardPage() {
         />
       </div>
 
-      {/* Financial summary row */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={TrendingUp}
@@ -274,7 +259,6 @@ export function DashboardPage() {
         />
       </div>
 
-      {/* Departments collection chart + workers/users */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="p-5 lg:col-span-2">
           <SectionHeader title="نسبة التحصيل حسب القسم" />
@@ -359,7 +343,6 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Overdue payments + recent attendance */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="p-5">
           <SectionHeader title="أحدث المستحقات المتأخرة" />

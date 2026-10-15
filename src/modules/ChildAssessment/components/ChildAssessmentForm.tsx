@@ -14,7 +14,6 @@ interface Props {
   onCancel: () => void;
 }
 
-/** فورم تسجيل تقييم جديد للطالب في القسم المختار حاليًا */
 export function ChildAssessmentForm({ childId, departmentId, onSubmit, isLoading, onCancel }: Props) {
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(addAssessmentSchema),

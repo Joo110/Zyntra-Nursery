@@ -6,11 +6,6 @@ import { useBranchStore } from '@/app/providers/branchStore';
 import { cn } from '@/lib/cn';
 import { ROUTES } from '@/app/router/routes.constants'; // ⚠️ عدّل المسار حسب مكان الملف عندك
 
-/**
- * جرس الإشعارات + النقطة الحمراء — راجع خطة الفرونت § مؤشر التنبيهات المرئي.
- * يفحص الحالات الأربعة (أعياد ميلاد / عدم دفع / سن الأخ / تجاوز غياب) بعد 5 ثوانٍ من فتح الموقع.
- * الضغط على أي تنبيه نشط يفتح الشاشة الخاصة به.
- */
 export function NotificationBell() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id);
   const { data: alerts } = useNotificationAlerts(branchId ?? '');

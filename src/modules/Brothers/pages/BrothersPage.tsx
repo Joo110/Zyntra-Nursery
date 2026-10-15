@@ -16,10 +16,6 @@ import { useBranchStore } from '@/app/providers/branchStore';
 import { PageLoader } from '@/components/loading/PageLoader';
 import { Period } from '@/types/enums.types';
 
-/**
- * راجع BACKEND_ISSUES.md - Issue #4: Brother لا يحتوي branchId بالـ API، الربط فقط عبر ChildId.
- * لذا هذه الصفحة تطلب من المستخدم اختيار قسم ثم طالب أولًا لعرض إخوته.
- */
 export function BrothersPage() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id);
   const [searchParams, setSearchParams] = useSearchParams();

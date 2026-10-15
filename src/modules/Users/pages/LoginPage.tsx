@@ -22,7 +22,6 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-2">
-      {/* الجانب الزخرفي */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-primary to-primary/80 p-10 text-white md:flex lg:p-16">
         <div className="pointer-events-none absolute inset-0 opacity-10">
           <div className="absolute -top-16 -left-16 h-72 w-72 rounded-full border-[3px] border-white" />
@@ -52,7 +51,6 @@ export function LoginPage() {
         </p>
       </div>
 
-      {/* جانب الفورم */}
       <div className="flex flex-col justify-center bg-white px-8 py-12 sm:px-16 lg:px-24">
         <div className="mx-auto w-full max-w-sm">
           <div className="mb-8 flex flex-col items-center gap-3 text-center md:items-start md:text-right">

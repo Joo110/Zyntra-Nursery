@@ -1,19 +1,23 @@
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Trash2, LogOut, AlertOctagon, Users, ClipboardList } from 'lucide-react';
+import { Trash2, LogOut, AlertOctagon, Users, ClipboardList, UsersRound } from 'lucide-react';
 import {
   useDepartureByDepartment,
-  useAddDeparture,
+  useAddBulkDeparture,
+  useAddBulkDepartureToday,
   useDeleteDeparture,
   useDeleteAllDeparture,
 } from '../hooks/useDeparture';
-import { useDepartmentChildren } from '@/modules/Children/hooks/useChildren';
+import { useSelectableChildren } from '@/modules/Children/hooks/useChildren';
+import { useAttendanceWindow } from '@/modules/Settings/hooks/useScheduleRules';
+import { ClosedWindowNotice } from '@/components/common/ClosedWindowNotice';
+import { ClassSelector } from '@/components/common/ClassSelector';
 import type { DepartueHistoryDto } from '../types/departure.types';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
 import { Pagination } from '@/components/tables/Pagination';
 import { DepartmentSelector } from '@/components/common/DepartmentSelector';
 import { PeriodSelector } from '@/components/common/PeriodSelector';
-import { Select } from '@/components/forms/Select';
+import { MultiSelect } from '@/components/forms/MultiSelect';
 import { Button } from '@/components/common/Button';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { DangerConfirmModal } from '@/components/modals/DangerConfirmModal';
@@ -23,7 +27,6 @@ import { Period } from '@/types/enums.types';
 
 const PAGE_SIZE = 10;
 
-/** ينسّق تاريخ + وقت في صيغة: يوم/شهر/سنة - ساعة:دقيقة */
 function formatDateTime(date: string, time?: string): string {
   if (!date) return '—';
   const d = new Date(date);
@@ -66,30 +69,45 @@ export function DeparturePage() {
   const pageNumber = Number(searchParams.get('page') ?? '1');
   const departmentId = searchParams.get('departmentId') ?? '';
   const period = Number(searchParams.get('period') ?? String(Period.AM)) as Period;
-  const [selectedChildId, setSelectedChildId] = useState('');
+  const classroomId = searchParams.get('classroomId') ?? '';
+  const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
+  const [confirmingAll, setConfirmingAll] = useState(false);
 
   const [deleting, setDeleting] = useState<DepartueHistoryDto | null>(null);
   const [deletingAll, setDeletingAll] = useState(false);
 
   const { data, isLoading, isError } = useDepartureByDepartment(branchId ?? '', departmentId, pageNumber, PAGE_SIZE);
-  const { data: children } = useDepartmentChildren(branchId ?? '', departmentId, period);
-  const addDeparture = useAddDeparture(branchId ?? '');
+  const { children, isPrimary, needsClassroom } = useSelectableChildren(branchId ?? '', departmentId, period, classroomId);
+  const departureWindow = useAttendanceWindow('leave');
+  const addBulkDeparture = useAddBulkDeparture(branchId ?? '');
+  const addBulkDepartureToday = useAddBulkDepartureToday(branchId ?? '');
   const deleteDeparture = useDeleteDeparture(branchId ?? '');
   const deleteAllDeparture = useDeleteAllDeparture(branchId ?? '');
 
-  // استبعاد الطلاب اللي سجلوا انصرافهم بالفعل من قائمة الاختيار
-  // ⚠️ DepartueHistoryDto لا يحتوي على معرّف الطفل (childId)، فقط معرّف سجل الانصراف نفسه (id)،
-  // فالمطابقة بالاسم هي الحل المتاح حاليًا لحد ما الـ Backend يضيف childId لسجل الانصراف.
   const departedNames = useMemo(
     () => new Set((data?.items ?? []).map((i) => i.name?.trim().toLowerCase()).filter(Boolean)),
     [data?.items]
   );
   const availableChildren = useMemo(
-    () => (children ?? []).filter((c) => !departedNames.has(c.name?.trim().toLowerCase())),
+    () => children.filter((c) => !departedNames.has(c.name?.trim().toLowerCase())),
     [children, departedNames]
   );
 
+  const childOptions = useMemo(
+    () => availableChildren.map((c) => ({ value: String(c.id), label: c.name })),
+    [availableChildren]
+  );
+
+  const validSelectedIds = useMemo(() => {
+    const ids = new Set(childOptions.map((o) => o.value));
+    return selectedChildIds.filter((id) => ids.has(id));
+  }, [selectedChildIds, childOptions]);
+
   if (!branchId) return <PageLoader label="برجاء اختيار فرع أولًا..." />;
+
+  if (!departureWindow.isOpen) {
+    return <ClosedWindowNotice title="الانصراف" actionLabel="الانصراف" slots={departureWindow.slots} />;
+  }
 
   const updateParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams);
@@ -98,10 +116,10 @@ export function DeparturePage() {
   };
 
   const handleRegisterDeparture = () => {
-    if (!selectedChildId || !departmentId || addDeparture.isPending) return;
-    addDeparture.mutate(
-      { departmentId, childId: selectedChildId, dateTime: new Date().toISOString() },
-      { onSuccess: () => setSelectedChildId('') }
+    if (validSelectedIds.length === 0 || !departmentId || addBulkDeparture.isPending) return;
+    addBulkDeparture.mutate(
+      { departmentId, childIds: validSelectedIds, dateTime: new Date().toISOString() },
+      { onSuccess: () => setSelectedChildIds([]) }
     );
   };
 
@@ -142,9 +160,35 @@ export function DeparturePage() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="w-full max-w-xs">
-          <DepartmentSelector branchId={branchId} value={departmentId} onChange={(v) => updateParams({ departmentId: v, page: '1' })} />
+          <DepartmentSelector
+            branchId={branchId}
+            value={departmentId}
+            workingTodayOnly
+            onChange={(v) => {
+              setSelectedChildIds([]);
+              updateParams({ departmentId: v, classroomId: '', page: '1' });
+            }}
+          />
         </div>
-        <PeriodSelector value={period} onChange={(p) => updateParams({ period: String(p), page: '1' })} />
+        {departmentId && isPrimary && (
+          <div className="w-full max-w-xs">
+            <ClassSelector
+              branchId={branchId}
+              value={classroomId}
+              onChange={(v) => {
+                setSelectedChildIds([]);
+                updateParams({ classroomId: v, page: '1' });
+              }}
+            />
+          </div>
+        )}
+        <PeriodSelector
+          value={period}
+          onChange={(p) => {
+            setSelectedChildIds([]);
+            updateParams({ period: String(p), page: '1' });
+          }}
+        />
       </div>
 
       {!departmentId ? (
@@ -157,29 +201,41 @@ export function DeparturePage() {
         <>
           <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="w-full max-w-xs">
-                <Select value={selectedChildId} onChange={(e) => setSelectedChildId(e.target.value)}>
-                  <option value="">
-                    {availableChildren.length === 0 ? 'كل الطلاب سجلوا انصرافهم' : 'اختر طالب لتسجيل انصرافه'}
-                  </option>
-                  {availableChildren.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </Select>
+              <div className="w-full max-w-sm">
+                <MultiSelect
+                  options={childOptions}
+                  value={validSelectedIds}
+                  onChange={setSelectedChildIds}
+                  placeholder={
+                    needsClassroom
+                      ? 'اختر الفصل أولًا'
+                      : availableChildren.length === 0
+                        ? 'كل الطلاب سجلوا انصرافهم'
+                        : 'اختر طالب أو أكثر لتسجيل انصرافهم'
+                  }
+                  searchPlaceholder="ابحث باسم الطالب..."
+                  emptyMessage="لا يوجد طالب بهذا الاسم"
+                  disabled={needsClassroom || availableChildren.length === 0}
+                />
               </div>
               <Button
                 icon={<LogOut className="h-4 w-4" />}
                 onClick={handleRegisterDeparture}
-                isLoading={addDeparture.isPending}
-                disabled={!selectedChildId || availableChildren.length === 0 || addDeparture.isPending}
+                isLoading={addBulkDeparture.isPending}
+                disabled={validSelectedIds.length === 0 || addBulkDeparture.isPending}
               >
-                تسجيل انصراف
+                {validSelectedIds.length > 1 ? `تسجيل انصراف (${validSelectedIds.length})` : 'تسجيل انصراف'}
               </Button>
             </div>
 
-            <Button variant="danger" size="sm" icon={<AlertOctagon className="h-4 w-4" />} onClick={() => setDeletingAll(true)}>
-              حذف كل السجلات
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="secondary" icon={<UsersRound className="h-4 w-4" />} onClick={() => setConfirmingAll(true)}>
+                انصراف كل الحاضرين اليوم
+              </Button>
+              <Button variant="danger" size="sm" icon={<AlertOctagon className="h-4 w-4" />} onClick={() => setDeletingAll(true)}>
+                حذف كل السجلات
+              </Button>
+            </div>
           </div>
 
           <div className="rounded-xl border border-neutral-200 bg-white shadow-sm">
@@ -215,6 +271,16 @@ export function DeparturePage() {
           </div>
         </>
       )}
+
+      <ConfirmModal
+        isOpen={confirmingAll}
+        onClose={() => setConfirmingAll(false)}
+        onConfirm={() => addBulkDepartureToday.mutate(new Date().toISOString(), { onSettled: () => setConfirmingAll(false) })}
+        title="انصراف جماعي"
+        message="سيتم تسجيل انصراف كل من حضر اليوم ولم ينصرف بعد، في كل الأقسام وليس القسم المختار فقط. هل تريد المتابعة؟"
+        confirmLabel="تسجيل الانصراف"
+        isLoading={addBulkDepartureToday.isPending}
+      />
 
       <ConfirmModal
         isOpen={!!deleting}

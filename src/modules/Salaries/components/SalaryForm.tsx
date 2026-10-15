@@ -19,9 +19,7 @@ interface Props {
   onCancel: () => void;
 }
 
-/** فورم تسجيل/تعديل راتب معلم أو عامل — العضو يُختار حسب نوعه (Teacher/Worker) */
 export function SalaryForm({ branchId, onSubmit, isLoading, onCancel }: Props) {
-  // نمرر نوعين لـ useForm: نوع الإدخال (Input) قبل الـ coerce، ونوع الإخراج (Output) بعد الـ validation
   const {
     register,
     handleSubmit,
@@ -45,7 +43,6 @@ export function SalaryForm({ branchId, onSubmit, isLoading, onCancel }: Props) {
   const { data: teachers } = useTeachersList(branchId, 1, 200);
   const { data: workers } = useWorkersList(branchId, 1, 200);
 
-  // يجيب الراتب الأساسي فور اختيار موظف، لتعبئة حقل المبلغ تلقائيًا
   const { data: baseSalary, isFetching: isFetchingSalary } = useEmployeeBaseSalary(
     branchId,
     employeeType,
@@ -58,7 +55,6 @@ export function SalaryForm({ branchId, onSubmit, isLoading, onCancel }: Props) {
     }
   }, [baseSalary, setValue]);
 
-  // لما يغيّر نوع الموظف، نصفّر اختيار الموظف والمبلغ عشان منفضلش عالقين على راتب موظف من نوع مختلف
   useEffect(() => {
     setValue('employeeId', '');
     setValue('amount', 0);
@@ -67,7 +63,6 @@ export function SalaryForm({ branchId, onSubmit, isLoading, onCancel }: Props) {
   const employeeOptions = employeeType === MemberType.Teacher ? teachers?.items : workers?.items;
 
   const handleFormSubmit = handleSubmit((values) => {
-    // بعد نجاح الـ validation، values بتكون بنوع الإخراج (AddSalaryFormValues)
     onSubmit(values as AddSalaryFormValues);
   });
 

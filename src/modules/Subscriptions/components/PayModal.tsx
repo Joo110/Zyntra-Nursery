@@ -49,7 +49,6 @@ export function PayModal({ row, subscriptionId, isLoading, onClose, onConfirm }:
     if (fullPay) {
       onConfirm({ id: subscriptionId, isPaid: true, dateOfPayment: new Date().toISOString() });
     } else {
-      // دفع جزئي: المتبقي يحل محل amount ويفضل غير مدفوع
       onConfirm({ id: subscriptionId, amount: row.amount - num });
     }
   };

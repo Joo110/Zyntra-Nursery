@@ -3,7 +3,6 @@ import type { PagedResult, MessageResponse } from '@/types/pagination.types';
 import { MemberTypeBodyValue, type Period } from '../../Salaries/types/enums.types';
 import type { AbsenceHistoryDto, AddAbsenceHistoryDto } from '../types/absence.types';
 
-/** راجع 02-API-Contract-Detailed.md § 11) Absence */
 export const absenceService = {
   getByDepartment: (branchId: string, departmentId: string, pageNumber: number, take: number) =>
     axiosInstance
@@ -20,7 +19,6 @@ export const absenceService = {
       .post<MessageResponse>(`/branches/${branchId}/Absence/process-department-absences`, null, { params: { departmentId, period } })
       .then((res) => res.data),
 
-  /** ⚠️ memberType JSON body property — نفس مشكلة Salaries/Treasury، لازم اسم العضو الكامل */
   add: (branchId: string, dto: AddAbsenceHistoryDto) =>
     axiosInstance
       .post<MessageResponse>(`/branches/${branchId}/Absence`, {

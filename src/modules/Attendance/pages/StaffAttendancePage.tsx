@@ -14,6 +14,7 @@ import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { DangerConfirmModal } from '@/components/modals/DangerConfirmModal';
 import { useBranchStore } from '@/app/providers/branchStore';
 import { PageLoader } from '@/components/loading/PageLoader';
+import { useStaffTiming } from '@/modules/Settings/hooks/useScheduleRules';
 
 const PAGE_SIZE = 10;
 const LATE_THRESHOLD_MINUTES = 15;
@@ -23,7 +24,6 @@ const STAFF_TYPES: { value: MemberType; label: string }[] = [
   { value: MemberType.Worker, label: 'العمال' },
 ];
 
-/** ينسّق تاريخ + وقت في صيغة: يوم/شهر/سنة - ساعة:دقيقة */
 function formatDateTime(date: string, time?: string): string {
   if (!date) return '—';
   const d = new Date(date);
@@ -77,7 +77,6 @@ function LateBadge({ minutes }: { minutes: number }) {
   );
 }
 
-
 export function StaffAttendancePage() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -92,6 +91,7 @@ export function StaffAttendancePage() {
   const { data: teachers } = useTeachersList(branchId ?? '', 1, 100);
   const { data: workers } = useWorkersList(branchId ?? '', 1, 100);
   const addAttendance = useAddMemberAttendance(branchId ?? '');
+  const staffTiming = useStaffTiming(memberType);
   const deleteAttendance = useDeleteAttendance(branchId ?? '');
   const deleteAllAttendance = useDeleteAllAttendance(branchId ?? '');
 
@@ -111,7 +111,7 @@ export function StaffAttendancePage() {
   };
 
   const handleRegisterAttendance = () => {
-    if (!selectedMemberId || addAttendance.isPending) return;
+    if (!selectedMemberId || addAttendance.isPending || !staffTiming.isOpen) return;
     const now = new Date();
     addAttendance.mutate(
       {
@@ -119,7 +119,7 @@ export function StaffAttendancePage() {
         memberType,
         date: now.toISOString(),
         time: now.toTimeString().slice(0, 5),
-        late: 0,
+        late: staffTiming.lateMinutes,
       },
       {
         onSuccess: () => {
@@ -194,10 +194,13 @@ export function StaffAttendancePage() {
             icon={<UserCheck className="h-4 w-4" />}
             onClick={handleRegisterAttendance}
             isLoading={addAttendance.isPending}
-            disabled={!selectedMemberId || addAttendance.isPending}
+            disabled={!selectedMemberId || addAttendance.isPending || !staffTiming.isOpen}
           >
             تسجيل حضور
           </Button>
+          {!staffTiming.isOpen && (
+            <p className="ltr-numerals text-xs text-neutral-500">تسجيل الحضور يبدأ من {staffTiming.startLabel}</p>
+          )}
         </div>
 
         <Button variant="danger" size="sm" icon={<AlertOctagon className="h-4 w-4" />} onClick={() => setDeletingAll(true)}>

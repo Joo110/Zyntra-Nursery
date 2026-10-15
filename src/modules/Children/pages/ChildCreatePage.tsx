@@ -17,13 +17,10 @@ export function ChildCreatePage() {
   if (!branchId) return <PageLoader label="برجاء اختيار فرع أولًا..." />;
 
   const handleSubmit = (values: AddChildFormValues) => {
-    // ⚠️ busId غير مدعوم بـ AddChildDto حاليًا بالباك (راجع تعليق ChildForm) — لا يُرسل هنا عمدًا.
     createChild.mutate(
       { ...values, gender: values.gender as Gender, period: values.period as Period, email: values.email || null },
       {
         onSuccess: () => {
-          // AddChildAsync بالباك يرجّع رسالة نجاح فقط بدون Id الطالب الجديد، لذلك لا يمكن
-          // نداء Treasury/child/{childId}/advance-payment من هنا مباشرة — راجع البلاغ في خطة الفرونت.
           if (values.isAdvancePaymentMade && values.advancePaymentAmount && values.advancePaymentAmount > 0) {
             toast.info('برجاء الدخول لتعديل بيانات الطالب لتسجيل مقدمة الحجز، لأن الباك لا يرجّع معرّف الطالب الجديد بعد الإضافة');
           }

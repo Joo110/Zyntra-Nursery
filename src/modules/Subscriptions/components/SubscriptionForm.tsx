@@ -25,7 +25,6 @@ interface Props {
   branchId: string;
   departmentId: string;
   period: Period;
-  // لازم ترجع true لو الحفظ نجح، عشان نقدر نعرض الوصل بعدها بأمان
   onSubmit: (values: AddSubscriptionFormValues) => Promise<boolean>;
   isLoading?: boolean;
   onCancel: () => void;
@@ -39,13 +38,8 @@ export function SubscriptionForm({
     defaultValues: { isPaid: false, monthSubscription: new Date().toISOString().slice(0, 10) },
   });
 
-  // ⚠️ فلتر القسم في صفحة الاشتراكات اختياري وممكن يكون فاضي (لسه محددش المستخدم قسم)،
-  // فلو اعتمدنا عليه وحده هيفضل الـ dropdown بتاع الطالب معطّل جوه الفورم بلا أي طريقة لتغييره.
-  // بنمسك اختيار القسم بحالة داخلية جوه الفورم نفسه، تتهيّأ بقيمة فلتر الصفحة (لو موجودة) وتقدر تتغيّر هنا مباشرة.
   const [departmentId, setDepartmentId] = useState(initialDepartmentId ?? '');
 
-  // نفس قائمة الأطفال اللي بيستخدمها ChildDropdown، بنستخدمها هنا لعمل lookup لاسم الطالب
-  // (React Query هيرجعها من الكاش من غير ريكوست إضافي طالما نفس query key)
   const { data: children } = useDepartmentChildren(branchId, departmentId ?? '', period);
 
   const [pendingReceipt, setPendingReceipt] = useState<SubscriptionReceiptData | null>(null);
@@ -99,7 +93,6 @@ export function SubscriptionForm({
         </div>
       </form>
 
-      {/* مودال تأكيد الطباعة بعد نجاح الحفظ — نفس فكرة pendingPrintData في FinancePage */}
       {pendingReceipt && (
         <Modal
           isOpen={!!pendingReceipt}

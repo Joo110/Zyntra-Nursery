@@ -7,10 +7,6 @@ import type {
   ChildDepartmentProgressDto,
 } from '../types/childAssessment.types';
 
-/** راجع ChildAssessmentController بالباك (Route: api/branches/{branchId}/children/assessments) */
-
-// 404 من الـ endpoints دي معناه "مفيش تقييمات مسجلة لسه" وده حالة طبيعية
-// مش error حقيقي، فبنمسكه هنا ونرجّع قيمة فاضية بدل ما نسيبه يطلع كـ exception
 function isNotFound(err: unknown): boolean {
   return (err as { status?: number })?.status === 404;
 }

@@ -18,14 +18,9 @@ interface ChildFormProps {
   onSubmit: (values: AddChildFormValues) => void;
   isLoading?: boolean;
   onCancel: () => void;
-  /** يفرّق بين الإضافة والتعديل لعرض ملاحظات خاصة بقيود الباك (مثل busId عند الإنشاء) */
   mode?: 'create' | 'edit';
 }
 
-/**
- * فورم إضافة/تعديل طالب — مقسّم لأقسام (راجع Master Prompt § 29 Forms).
- * يعتمد على ClassId/LevelId من نفس الفرع (راجع Business Rule بـ AddChildAsync — 03-Business-Flow.md).
- */
 export function ChildForm({ branchId, initialData, onSubmit, isLoading, onCancel, mode = 'create' }: ChildFormProps) {
   const {
     register,

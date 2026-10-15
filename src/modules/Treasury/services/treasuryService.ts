@@ -9,7 +9,6 @@ import type {
   DepartmentTreasuryReportDto,
 } from '../types/treasury.types';
 
-/** راجع TreasuryController الكامل بالباك (Zyntra.School.API/Controllers/TreasuryController.cs) */
 export const treasuryService = {
   getMonthly: (branchId: string, pageNumber: number, take: number, day?: string, departmentId?: string) =>
     axiosInstance
@@ -92,9 +91,6 @@ export const treasuryService = {
       .get<string[]>(`/branches/${branchId}/Treasury/months`, { params: { departmentId } })
       .then((res) => res.data),
 
-  /** ⚠️ memberType هنا JSON body property — نفس مشكلة Salaries: لازم يتبعت كاسم العضو
-   *  الكامل ("Teacher"/"Worker"/"Child") مش كحرف، عشان الباك اند يقدر يعمل JSON deserialize
-   *  للـ enum MemberType بنجاح. راجع MemberTypeQueryName في enums.types.ts. */
   add: (branchId: string, dto: AddTreasuryDataDto) =>
     axiosInstance
       .post<MessageResponse>(`/branches/${branchId}/Treasury`, {

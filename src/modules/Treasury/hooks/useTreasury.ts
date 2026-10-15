@@ -30,7 +30,6 @@ export const treasuryKeys = {
     [...treasuryKeys.all, 'department-by-type', branchId, departmentId, { dateFrom, dateTo }] as const,
 };
 
-/** GET /Treasury/monthly — راجع 05-Caching-....md: Treasury staleTime = 30 ثانية */
 export function useTreasuryMonthly(branchId: string, pageNumber: number, take: number, day?: string, departmentId?: string) {
   return useQuery({
     queryKey: treasuryKeys.monthly(branchId, pageNumber, take, day, departmentId),
@@ -40,7 +39,6 @@ export function useTreasuryMonthly(branchId: string, pageNumber: number, take: n
   });
 }
 
-/** GET /Treasury/monthly/order — فلترة الحركات الشهرية حسب نوع الحركة (دخل/صرف) */
 export function useTreasuryMonthlyOrder(
   branchId: string,
   transaction: TrunsactionType,
@@ -57,7 +55,6 @@ export function useTreasuryMonthlyOrder(
   });
 }
 
-/** GET /Treasury/yearly — الحركات السنوية بفلاتر اختيارية (شهر/يوم/نوع/قسم) */
 export function useTreasuryYearly(
   branchId: string,
   pageNumber: number,
@@ -75,7 +72,6 @@ export function useTreasuryYearly(
   });
 }
 
-/** GET /Treasury/yearly/month — الحركات السنوية لشهر محدد */
 export function useTreasuryYearlyByMonth(
   branchId: string,
   month: string,
@@ -92,7 +88,6 @@ export function useTreasuryYearlyByMonth(
   });
 }
 
-/** GET /Treasury/yearly/type — الحركات السنوية حسب نوع الحركة فقط */
 export function useTreasuryYearlyByType(
   branchId: string,
   transaction: TrunsactionType,
@@ -108,7 +103,6 @@ export function useTreasuryYearlyByType(
   });
 }
 
-/** GET /Treasury/yearly/type/month — الحركات السنوية حسب نوع الحركة + شهر + يوم محدد */
 export function useTreasuryYearlyByTypeAndMonth(
   branchId: string,
   transaction: TrunsactionType,
@@ -126,7 +120,6 @@ export function useTreasuryYearlyByTypeAndMonth(
   });
 }
 
-/** GET /Treasury/months — الشهور المتاحة اللي فيها بيانات خزينة */
 export function useAvailableMonths(branchId: string, departmentId?: string) {
   return useQuery({
     queryKey: treasuryKeys.months(branchId, departmentId),
@@ -136,7 +129,6 @@ export function useAvailableMonths(branchId: string, departmentId?: string) {
   });
 }
 
-/** تقرير الخزنة الشهري (دخل/رواتب/مصاريف/أرباح/رصيد/متأخرات) */
 export function useMonthlyTreasuryReport(branchId: string, year: number, month: number) {
   return useQuery({
     queryKey: treasuryKeys.monthlyReport(branchId, year, month),
@@ -146,7 +138,6 @@ export function useMonthlyTreasuryReport(branchId: string, year: number, month: 
   });
 }
 
-/** تقرير الأقسام (نسبة التحصيل لكل قسم) */
 export function useDepartmentsTreasuryReport(branchId: string, dateFrom?: string, dateTo?: string) {
   return useQuery({
     queryKey: treasuryKeys.departmentsReport(branchId, dateFrom, dateTo),
@@ -156,7 +147,6 @@ export function useDepartmentsTreasuryReport(branchId: string, dateFrom?: string
   });
 }
 
-/** GET /Treasury/department/{id}/total — إجمالي الخزينة لقسم معين */
 export function useDepartmentTreasuryTotal(branchId: string, departmentId: string, dateFrom?: string, dateTo?: string) {
   return useQuery({
     queryKey: treasuryKeys.departmentTotal(branchId, departmentId, dateFrom, dateTo),
@@ -166,7 +156,6 @@ export function useDepartmentTreasuryTotal(branchId: string, departmentId: strin
   });
 }
 
-/** GET /Treasury/department/{id}/by-type — إحصائيات القسم مجمعة حسب نوع الحركة */
 export function useDepartmentTreasuryByType(branchId: string, departmentId: string, dateFrom?: string, dateTo?: string) {
   return useQuery({
     queryKey: treasuryKeys.departmentByType(branchId, departmentId, dateFrom, dateTo),
@@ -188,11 +177,6 @@ export function useCreateTreasuryEntry(branchId: string) {
   });
 }
 
-/**
- * ⚠️ التعديل بيحتاج treasuryDataId، وهو مش موجود في TreasuryDataDto الحالي
- * (اللي بيرجع من /monthly أو /yearly). الـ Hook جاهز، لكن لازم الباك يضيف
- * حقل "id" في TreasuryDataDto عشان يبقى ينفع نستخدمه على صف معين في الجدول.
- */
 export function useUpdateTreasuryEntry(branchId: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -205,7 +189,6 @@ export function useUpdateTreasuryEntry(branchId: string) {
   });
 }
 
-/** ⚠️ نفس ملاحظة التعديل: محتاج treasuryDataId غير متاح حاليًا في الـ DTO */
 export function useDeleteTreasuryEntry(branchId: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -218,7 +201,6 @@ export function useDeleteTreasuryEntry(branchId: string) {
   });
 }
 
-/** تسجيل مقدمة/عربون طفل — Endpoint مخصص منفصل عن الطفل نفسه */
 export function useMarkAdvancePayment(branchId: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -231,7 +213,6 @@ export function useMarkAdvancePayment(branchId: string) {
     onError: (e: ApiError) => toast.error(e.message),
   });
 }
-
 
 export function useMarkSubscriptionOverdue(branchId: string) {
   const qc = useQueryClient();

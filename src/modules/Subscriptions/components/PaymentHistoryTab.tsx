@@ -14,7 +14,6 @@ const PERIOD_LABELS: Record<Period, string> = {
   [Period.PM]: 'مسائي',
 };
 
-/** أول يوم في الشهر الحالي وآخره بصيغة YYYY-MM-DD */
 function monthRange() {
   const now = new Date();
   const fmt = (d: Date) =>
@@ -41,7 +40,6 @@ export function PaymentHistoryTab() {
     PAGE_SIZE
   );
 
-  // بحث بالاسم على الصفحة الحالية (الـ API مفيهوش فلتر اسم)
   const rows = (data?.items ?? []).filter((r) => !search.trim() || r.name.includes(search.trim()));
 
   const columns: ColumnDef<PaymentHistoryInfoDto>[] = [

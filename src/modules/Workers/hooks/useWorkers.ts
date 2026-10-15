@@ -20,7 +20,6 @@ export function useWorkersList(branchId: string, pageNumber: number, take: numbe
   });
 }
 
-/** جلب بيانات عامل واحد بالتفصيل (للعرض/التعديل) */
 export function useWorker(branchId: string, id: string | undefined) {
   return useQuery({
     queryKey: workerKeys.detail(branchId, id ?? ''),

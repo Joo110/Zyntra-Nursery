@@ -4,6 +4,7 @@ import { attendanceService } from '../services/attendanceService';
 import type { AddAttendanceHistoryDto } from '../types/attendance.types';
 import type { MemberType } from '../../Salaries/types/enums.types';
 import type { ApiError } from '@/types/api-error.types';
+import { absenceKeys } from '@/modules/Absence/hooks/useAbsence';
 
 export const attendanceKeys = {
   all: ['attendance'] as const,
@@ -13,7 +14,6 @@ export const attendanceKeys = {
     [...attendanceKeys.all, 'history', branchId, memberType, { pageNumber, take }] as const,
 };
 
-/** حضور المعلمين/العمال (وأي memberType آخر) — بدون تقيد بقسم */
 export function useAttendanceHistory(branchId: string, memberType: MemberType, pageNumber: number, take: number) {
   return useQuery({
     queryKey: attendanceKeys.history(branchId, memberType, pageNumber, take),
@@ -24,7 +24,6 @@ export function useAttendanceHistory(branchId: string, memberType: MemberType, p
   });
 }
 
-/** تسجيل حضور عام لمعلم/عامل (بدون قسم) */
 export function useAddMemberAttendance(branchId: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -37,7 +36,6 @@ export function useAddMemberAttendance(branchId: string) {
   });
 }
 
-/** راجع 05-Caching-....md: Attendance staleTime = 0 (Fresh دائمًا) */
 export function useAttendanceByDepartment(branchId: string, departmentId: string, pageNumber: number, take: number) {
   return useQuery({
     queryKey: attendanceKeys.byDepartment(branchId, departmentId, pageNumber, take),
@@ -56,6 +54,63 @@ export function useAddAttendance(branchId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: attendanceKeys.all });
       toast.success('تم تسجيل الحضور بنجاح');
+    },
+    onError: (e: ApiError) => toast.error(e.message),
+  });
+}
+
+export function useAddBulkAttendance(branchId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      departmentId,
+      childIds,
+      dateTime,
+      lateMinutes,
+    }: {
+      departmentId: string;
+      childIds: string[];
+      dateTime: string;
+      lateMinutes?: number;
+    }) => {
+      const results = await Promise.allSettled(
+        childIds.map((childId) => attendanceService.addForDepartmentChild(branchId, departmentId, childId, dateTime, lateMinutes))
+      );
+      const failedIds = childIds.filter((_, i) => results[i].status === 'rejected');
+      return { total: childIds.length, succeeded: childIds.length - failedIds.length, failedIds };
+    },
+    onSuccess: ({ total, succeeded, failedIds }) => {
+      qc.invalidateQueries({ queryKey: attendanceKeys.all });
+      if (failedIds.length === 0) {
+        toast.success(total === 1 ? 'تم تسجيل الحضور بنجاح' : `تم تسجيل حضور ${succeeded} طالب بنجاح`);
+      } else if (succeeded === 0) {
+        toast.error('فشل تسجيل الحضور');
+      } else {
+        toast.warning(`تم تسجيل ${succeeded} وفشل تسجيل ${failedIds.length}`);
+      }
+    },
+    onError: (e: ApiError) => toast.error(e.message),
+  });
+}
+
+export function useMarkAttendanceByClassroom(branchId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      classroomId,
+      absentStudentIds,
+      dateTime,
+      lateMinutes,
+    }: {
+      classroomId: string;
+      absentStudentIds: string[];
+      dateTime: string;
+      lateMinutes?: number;
+    }) => attendanceService.markByClassroom(branchId, classroomId, absentStudentIds, dateTime, lateMinutes),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: attendanceKeys.all });
+      qc.invalidateQueries({ queryKey: absenceKeys.all });
+      toast.success('تم تسجيل الغياب للمختارين والحضور لباقي طلاب الفصل');
     },
     onError: (e: ApiError) => toast.error(e.message),
   });

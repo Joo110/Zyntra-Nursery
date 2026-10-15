@@ -3,7 +3,6 @@ import type { PagedResult, MessageResponse } from '@/types/pagination.types';
 import { MemberTypeQueryName, MemberTypeBodyValue, type MemberType } from '../../Salaries/types/enums.types';
 import type { AttendanceHistoryDto, AddAttendanceHistoryDto } from '../types/attendance.types';
 
-/** راجع 02-API-Contract-Detailed.md § 10) Attendance */
 export const attendanceService = {
   getByDepartment: (branchId: string, departmentId: string, pageNumber: number, take: number) =>
     axiosInstance
@@ -12,7 +11,6 @@ export const attendanceService = {
       })
       .then((res) => res.data),
 
-  /** ⚠️ memberType لازم يتبعت كاسم العضو الكامل (Teacher/Worker/Child) مش الحرف — راجع MemberTypeQueryName */
   getHistory: (branchId: string, memberType: MemberType, pageNumber: number, take: number) =>
     axiosInstance
       .get<PagedResult<AttendanceHistoryDto>>(`/branches/${branchId}/Attendance/history`, {
@@ -27,15 +25,18 @@ export const attendanceService = {
       })
       .then((res) => res.data),
 
-  /**
-   * تسجيل حضور عام لأي عضو (معلم/عامل) بدون التقيد بقسم — لاستخدام حضور وانصراف الموظفين.
-   * ⚠️ memberType JSON body property — نفس مبدأ Absence.add، لازم يتبعت بصيغة القيمة الرقمية (MemberTypeBodyValue)
-   */
   add: (branchId: string, dto: AddAttendanceHistoryDto) =>
     axiosInstance
       .post<MessageResponse>(`/branches/${branchId}/Attendance`, {
         ...dto,
         memberType: MemberTypeBodyValue[dto.memberType],
+      })
+      .then((res) => res.data),
+
+  markByClassroom: (branchId: string, classroomId: string, absentStudentIds: string[], dateTime: string, lateMinutes = 0) =>
+    axiosInstance
+      .post(`/branches/${branchId}/Attendance/classroom/mark-attendance`, { classroomId, absentStudentIds }, {
+        params: { dateTime, lateMinutes },
       })
       .then((res) => res.data),
 

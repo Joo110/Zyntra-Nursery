@@ -7,7 +7,6 @@ interface BusDropdownProps {
   onChange: (value: string) => void;
 }
 
-/** دروب داون اختيار الباص — يُستخدم في فورم الطفل لربط الطفل بباص معيّن (Child.BusId) */
 export function BusDropdown({ branchId, value, onChange }: BusDropdownProps) {
   const { data: buses, isLoading } = useBusesDropdown(branchId);
 

@@ -1,4 +1,3 @@
-/** مطابق لـ BusListDto بالباك (BusController § list) */
 export interface BusListDto {
   id: string;
   name: string;
@@ -8,14 +7,12 @@ export interface BusListDto {
   driverName?: string | null;
 }
 
-/** مطابق لـ BusDropdownDto */
 export interface BusDropdownDto {
   id: string;
   name: string;
   driverName?: string | null;
 }
 
-/** مطابق لـ AddBusDto — driverId مطلوب (Guid غير Nullable بالباك) */
 export interface AddBusDto {
   branchId: string;
   name: string;
@@ -24,7 +21,6 @@ export interface AddBusDto {
   driverId: string;
 }
 
-/** مطابق لـ UpdateBusDto */
 export interface UpdateBusDto {
   id: string;
   name?: string | null;

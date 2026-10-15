@@ -75,10 +75,10 @@ export function AppRouter() {
 
             <Route path={ROUTES.EVALUATIONS} element={<EvaluationsPage />} />
             <Route path={ROUTES.EVALUATIONS_WINNERS} element={<EvaluationsWinnersPage />} />
-            <Route path={ROUTES.EVALUATIONS_HISTORY} element={<EvaluationsHistoryPage />} /> {/* جديد */}
+            <Route path={ROUTES.EVALUATIONS_HISTORY} element={<EvaluationsHistoryPage />} />
 
             <Route path={ROUTES.SUBSCRIPTIONS} element={<SubscriptionsPage />} />
-            <Route path={ROUTES.CHILDREN_SUBSCRIPTION_INFO} element={<ChildrenSubscriptionInfoPage />} /> {/* جديد */}
+            <Route path={ROUTES.CHILDREN_SUBSCRIPTION_INFO} element={<ChildrenSubscriptionInfoPage />} />
             <Route path={ROUTES.TREASURY} element={<TreasuryPage />} />
             <Route path={ROUTES.SALARIES} element={<SalariesPage />} />
             <Route path={ROUTES.BUSES} element={<BusesPage />} />

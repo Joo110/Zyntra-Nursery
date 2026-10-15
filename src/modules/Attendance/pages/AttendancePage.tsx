@@ -1,14 +1,17 @@
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Trash2, UserCheck, AlertOctagon, Clock, Users, ClipboardList } from 'lucide-react';
-import { useAttendanceByDepartment, useAddAttendance, useDeleteAttendance, useDeleteAllAttendance } from '../hooks/useAttendance';
-import { useDepartmentChildren } from '@/modules/Children/hooks/useChildren';
+import { useAttendanceByDepartment, useAddBulkAttendance, useDeleteAttendance, useDeleteAllAttendance } from '../hooks/useAttendance';
+import { useSelectableChildren } from '@/modules/Children/hooks/useChildren';
+import { useAttendanceWindow, useKidsLateMinutes } from '@/modules/Settings/hooks/useScheduleRules';
+import { ClosedWindowNotice } from '@/components/common/ClosedWindowNotice';
+import { ClassSelector } from '@/components/common/ClassSelector';
 import type { AttendanceHistoryDto } from '../types/attendance.types';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
 import { Pagination } from '@/components/tables/Pagination';
 import { DepartmentSelector } from '@/components/common/DepartmentSelector';
 import { PeriodSelector } from '@/components/common/PeriodSelector';
-import { Select } from '@/components/forms/Select';
+import { MultiSelect } from '@/components/forms/MultiSelect';
 import { Button } from '@/components/common/Button';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { DangerConfirmModal } from '@/components/modals/DangerConfirmModal';
@@ -17,9 +20,8 @@ import { PageLoader } from '@/components/loading/PageLoader';
 import { Period } from '@/types/enums.types';
 
 const PAGE_SIZE = 10;
-const LATE_THRESHOLD_MINUTES = 15; // تقدر تغيّرها حسب سياسة المدرسة
+const LATE_THRESHOLD_MINUTES = 15;
 
-/** ينسّق تاريخ + وقت في صيغة: يوم/شهر/سنة - ساعة:دقيقة */
 function formatDateTime(date: string, time?: string): string {
   if (!date) return '—';
   const d = new Date(date);
@@ -79,34 +81,46 @@ export function AttendancePage() {
   const pageNumber = Number(searchParams.get('page') ?? '1');
   const departmentId = searchParams.get('departmentId') ?? '';
   const period = Number(searchParams.get('period') ?? String(Period.AM)) as Period;
-  const [selectedChildId, setSelectedChildId] = useState('');
+  const classroomId = searchParams.get('classroomId') ?? '';
+  const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
 
   const [deleting, setDeleting] = useState<AttendanceHistoryDto | null>(null);
   const [deletingAll, setDeletingAll] = useState(false);
 
   const { data, isLoading, isError } = useAttendanceByDepartment(branchId ?? '', departmentId, pageNumber, PAGE_SIZE);
-  const { data: children } = useDepartmentChildren(branchId ?? '', departmentId, period);
-  const addAttendance = useAddAttendance(branchId ?? '');
+  const { children, isPrimary, needsClassroom } = useSelectableChildren(branchId ?? '', departmentId, period, classroomId);
+  const attendanceWindow = useAttendanceWindow('enter');
+  const kidsLateMinutes = useKidsLateMinutes(period);
+  const addBulkAttendance = useAddBulkAttendance(branchId ?? '');
   const deleteAttendance = useDeleteAttendance(branchId ?? '');
   const deleteAllAttendance = useDeleteAllAttendance(branchId ?? '');
 
-  // استبعاد الطلاب اللي سجلوا حضورهم بالفعل من قائمة الاختيار
-  // ⚠️ تصحيح: AttendanceHistoryDto لا يحتوي على معرّف الطفل (childId)، فقط معرّف سجل الحضور نفسه (id).
-  // كانت المقارنة القديمة تقارن id سجل الحضور بـ id الطفل (لا يتطابقان أبدًا)، فيظل الطالب ظاهرًا في
-  // القائمة رغم تسجيل حضوره فعلاً، ويقدر المستخدم يضيفه مرة تانية فيظهر "مكرر" في الجدول.
-  // بديل مؤقت للمطابقة (بالاسم) لحد ما الـ Backend يضيف childId لسجل الحضور.
   const attendedNames = useMemo(
     () => new Set((data?.items ?? []).map((i) => i.name?.trim().toLowerCase()).filter(Boolean)),
     [data?.items]
   );
   const availableChildren = useMemo(
-    () => (children ?? []).filter((c) => !attendedNames.has(c.name?.trim().toLowerCase())),
+    () => children.filter((c) => !attendedNames.has(c.name?.trim().toLowerCase())),
     [children, attendedNames]
   );
+
+  const childOptions = useMemo(
+    () => availableChildren.map((c) => ({ value: String(c.id), label: c.name })),
+    [availableChildren]
+  );
+
+  const validSelectedIds = useMemo(() => {
+    const ids = new Set(childOptions.map((o) => o.value));
+    return selectedChildIds.filter((id) => ids.has(id));
+  }, [selectedChildIds, childOptions]);
 
   const lateCount = useMemo(() => (data?.items ?? []).filter((i) => (i.late ?? 0) > 0).length, [data?.items]);
 
   if (!branchId) return <PageLoader label="برجاء اختيار فرع أولًا..." />;
+
+  if (!attendanceWindow.isOpen) {
+    return <ClosedWindowNotice title="الحضور" actionLabel="الحضور" slots={attendanceWindow.slots} />;
+  }
 
   const updateParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams);
@@ -115,10 +129,10 @@ export function AttendancePage() {
   };
 
   const handleRegisterAttendance = () => {
-    if (!selectedChildId || !departmentId || addAttendance.isPending) return;
-    addAttendance.mutate(
-      { departmentId, childId: selectedChildId, dateTime: new Date().toISOString() },
-      { onSuccess: () => setSelectedChildId('') }
+    if (validSelectedIds.length === 0 || !departmentId || addBulkAttendance.isPending) return;
+    addBulkAttendance.mutate(
+      { departmentId, childIds: validSelectedIds, dateTime: new Date().toISOString(), lateMinutes: kidsLateMinutes },
+      { onSuccess: () => setSelectedChildIds([]) }
     );
   };
 
@@ -160,9 +174,35 @@ export function AttendancePage() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="w-full max-w-xs">
-          <DepartmentSelector branchId={branchId} value={departmentId} onChange={(v) => updateParams({ departmentId: v, page: '1' })} />
+          <DepartmentSelector
+            branchId={branchId}
+            value={departmentId}
+            workingTodayOnly
+            onChange={(v) => {
+              setSelectedChildIds([]);
+              updateParams({ departmentId: v, classroomId: '', page: '1' });
+            }}
+          />
         </div>
-        <PeriodSelector value={period} onChange={(p) => updateParams({ period: String(p), page: '1' })} />
+        {departmentId && isPrimary && (
+          <div className="w-full max-w-xs">
+            <ClassSelector
+              branchId={branchId}
+              value={classroomId}
+              onChange={(v) => {
+                setSelectedChildIds([]);
+                updateParams({ classroomId: v, page: '1' });
+              }}
+            />
+          </div>
+        )}
+        <PeriodSelector
+          value={period}
+          onChange={(p) => {
+            setSelectedChildIds([]);
+            updateParams({ period: String(p), page: '1' });
+          }}
+        />
       </div>
 
       {!departmentId ? (
@@ -175,23 +215,30 @@ export function AttendancePage() {
         <>
           <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="w-full max-w-xs">
-                <Select value={selectedChildId} onChange={(e) => setSelectedChildId(e.target.value)}>
-                  <option value="">
-                    {availableChildren.length === 0 ? 'كل الطلاب سجلوا حضورهم' : 'اختر طالب لتسجيل حضوره'}
-                  </option>
-                  {availableChildren.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </Select>
+              <div className="w-full max-w-sm">
+                <MultiSelect
+                  options={childOptions}
+                  value={validSelectedIds}
+                  onChange={setSelectedChildIds}
+                  placeholder={
+                    needsClassroom
+                      ? 'اختر الفصل أولًا'
+                      : availableChildren.length === 0
+                        ? 'كل الطلاب سجلوا حضورهم'
+                        : 'اختر طالب أو أكثر لتسجيل حضورهم'
+                  }
+                  searchPlaceholder="ابحث باسم الطالب..."
+                  emptyMessage="لا يوجد طالب بهذا الاسم"
+                  disabled={needsClassroom || availableChildren.length === 0}
+                />
               </div>
               <Button
                 icon={<UserCheck className="h-4 w-4" />}
                 onClick={handleRegisterAttendance}
-                isLoading={addAttendance.isPending}
-                disabled={!selectedChildId || availableChildren.length === 0 || addAttendance.isPending}
+                isLoading={addBulkAttendance.isPending}
+                disabled={validSelectedIds.length === 0 || addBulkAttendance.isPending}
               >
-                تسجيل حضور
+                {validSelectedIds.length > 1 ? `تسجيل حضور (${validSelectedIds.length})` : 'تسجيل حضور'}
               </Button>
             </div>
 

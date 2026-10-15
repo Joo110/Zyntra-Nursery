@@ -18,12 +18,6 @@ function readStoredBranch(): BranchDropdownDto | null {
   }
 }
 
-/**
- * حالة عامة (Global UI State) للفرع المختار حاليًا بالتطبيق.
- * أغلب الـ Endpoints بالـ Backend تعتمد على {branchId} بالمسار (راجع 02-API-Contract-Detailed.md)،
- * لذا هذا الـ Store هو مصدر الحقيقة الوحيد لـ branchId المُستخدم بكل الـ Modules، بدل تمريره
- * يدويًا أو تخزينه بشكل Hardcoded (راجع Master Prompt بند 6).
- */
 export const useBranchStore = create<BranchState>((set) => ({
   selectedBranch: readStoredBranch(),
   setSelectedBranch: (branch) => {

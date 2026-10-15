@@ -14,10 +14,6 @@ interface DangerConfirmModalProps {
   isLoading?: boolean;
 }
 
-/**
- * تأكيد للعمليات المدمّرة (DELETE /all, reset-daily) - يتطلب كتابة كلمة تأكيد
- * قبل تفعيل الزر النهائي (راجع 04-...md § Shared Components: DangerConfirmModal).
- */
 export function DangerConfirmModal({
   isOpen,
   onClose,

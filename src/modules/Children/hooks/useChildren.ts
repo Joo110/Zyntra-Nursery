@@ -5,6 +5,7 @@ import { childrenKeys } from '@/constants/queryKeys.constants';
 import type { Period } from '@/types/enums.types';
 import type { AddChildDto, UpdateChildDto } from '../types/child.types';
 import type { ApiError } from '@/types/api-error.types';
+import { useIsPrimaryDepartment } from '@/modules/Departments/hooks/useDepartments';
 
 export function useChildrenList(
   branchId: string,
@@ -75,6 +76,29 @@ export function useDepartmentChildren(branchId: string, departmentId: string, pe
   });
 }
 
+export function useClassroomChildren(branchId: string, classroomId: string) {
+  return useQuery({
+    queryKey: childrenKeys.classroomChildren(branchId, classroomId),
+    queryFn: () => childService.getClassroomChildren(branchId, classroomId),
+    enabled: !!branchId && !!classroomId,
+    staleTime: 30_000,
+  });
+}
+
+export function useSelectableChildren(branchId: string, departmentId: string, period: Period, classroomId: string) {
+  const { isPrimary, isLoading: isKindLoading } = useIsPrimaryDepartment(branchId, departmentId);
+  const departmentChildren = useDepartmentChildren(branchId, isPrimary || isKindLoading ? '' : departmentId, period);
+  const classroomChildren = useClassroomChildren(branchId, isPrimary ? classroomId : '');
+
+  const source = isPrimary ? classroomChildren : departmentChildren;
+  return {
+    isPrimary,
+    needsClassroom: isPrimary && !classroomId,
+    children: isPrimary && !classroomId ? [] : source.data ?? [],
+    isLoading: isKindLoading || source.isLoading,
+  };
+}
+
 export function useCreateChild(branchId: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -111,7 +135,6 @@ export function useDeleteChild(branchId: string) {
   });
 }
 
-/** أرشفة/إلغاء أرشفة — منفصلة تمامًا عن الحذف (راجع 03-Business-Flow.md § Children Flow) */
 export function useSetChildActive(branchId: string) {
   const qc = useQueryClient();
   return useMutation({

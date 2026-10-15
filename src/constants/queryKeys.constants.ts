@@ -1,11 +1,3 @@
-/**
- * Query Key Factory مركزي — نمط هرمي موحّد لكل الـ Modules.
- * راجع 04-Architecture-CoreInfra-DesignSystem-SharedComponents.md § 5.2
- *
- * كل Module جديد يُضاف هنا بنفس النمط: all → lists → list(filters) → detail(id) ...
- * الهدف: Invalidation دقيق يستهدف الـ Keys ذات الصلة فقط (بدون invalidateQueries()
- * عام بلا Key، ممنوع حسب Master Prompt بند 46/10).
- */
 
 export const branchKeys = {
   all: ['branches'] as const,
@@ -21,6 +13,7 @@ export const departmentKeys = {
   list: (branchId: string, pageNumber: number, take: number, searchName?: string) =>
     [...departmentKeys.lists(branchId), { pageNumber, take, searchName }] as const,
   dropdown: (branchId: string) => [...departmentKeys.all, 'dropdown', branchId] as const,
+  absenceDropdown: (branchId: string) => [...departmentKeys.all, 'absence-dropdown', branchId] as const,
   detail: (departmentId: string) => [...departmentKeys.all, 'detail', departmentId] as const,
   financialStats: (branchId: string, departmentId: string) =>
     [...departmentKeys.all, 'financial-stats', branchId, departmentId] as const,
@@ -43,8 +36,6 @@ export const levelKeys = {
     [...levelKeys.lists(branchId), { pageNumber, take }] as const,
   count: (branchId: string) => [...levelKeys.all, 'count', branchId] as const,
 };
-
-
 
 export const childrenKeys = {
   all: ['children'] as const,
@@ -71,6 +62,8 @@ export const childrenKeys = {
   count: (branchId: string, period: number) => [...childrenKeys.all, 'count', branchId, period] as const,
   departmentChildren: (branchId: string, departmentId: string, period: number) =>
     [...childrenKeys.all, 'department-children', branchId, departmentId, period] as const,
+  classroomChildren: (branchId: string, classroomId: string) =>
+    [...childrenKeys.all, 'classroom-children', branchId, classroomId] as const,
 };
 
 export const userKeys = {

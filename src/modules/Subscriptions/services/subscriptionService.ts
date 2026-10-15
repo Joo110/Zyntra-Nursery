@@ -10,17 +10,12 @@ import type {
 } from '../types/subscription.types';
 import type { Period } from '@/types/enums.types';
 
-/**
- * ⚠️ شكل افتراضي لرد الـ endpoint الجديد (department controller).
- * لو الـ response عندك مختلف عدّل الـ interface دي بس، وباقي الكود هيفضل شغال.
- */
 export interface DepartmentSubscriptionSummaryDto {
   studentsCount: number;
   totalAmount: number;
   students: { id: string; name: string }[];
 }
 
-/** راجع 02-API-Contract-Detailed.md § 14) Subscriptions */
 export const subscriptionService = {
   getUnpaid: (branchId: string, period: Period, pageNumber: number, take: number, departmentId?: string) =>
     axiosInstance
@@ -28,7 +23,6 @@ export const subscriptionService = {
         params: { period, pageNumber, take, departmentId: departmentId || undefined },
       })
       .then((res) => res.data),
-
 
       
   getDepartmentSummary: async (

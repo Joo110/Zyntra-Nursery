@@ -9,7 +9,6 @@ import type {
 } from '../types/user.types';
 import type { MessageResponse } from '@/types/pagination.types';
 
-
 export const userService = {
 
   login: (userName: string, password: string) =>

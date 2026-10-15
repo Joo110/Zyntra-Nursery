@@ -1,12 +1,17 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Trash2, AlertOctagon, UserX, Users, CalendarClock, ClipboardList } from 'lucide-react';
-import { useAbsenceByDepartment, useProcessDepartmentAbsences, useDeleteAbsence, useDeleteAllAbsence } from '../hooks/useAbsence';
+import { Trash2, AlertOctagon, UserX, Users, CalendarClock, ClipboardList, ClipboardCheck } from 'lucide-react';
+import { useAbsenceByDepartment, useAddBulkAbsence, useProcessDepartmentAbsences, useDeleteAbsence, useDeleteAllAbsence } from '../hooks/useAbsence';
 import type { AbsenceHistoryDto } from '../types/absence.types';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
 import { Pagination } from '@/components/tables/Pagination';
 import { DepartmentSelector } from '@/components/common/DepartmentSelector';
 import { PeriodSelector } from '@/components/common/PeriodSelector';
+import { ClassSelector } from '@/components/common/ClassSelector';
+import { MultiSelect } from '@/components/forms/MultiSelect';
+import { useMarkAttendanceByClassroom } from '@/modules/Attendance/hooks/useAttendance';
+import { useSelectableChildren } from '@/modules/Children/hooks/useChildren';
+import { useKidsLateMinutes } from '@/modules/Settings/hooks/useScheduleRules';
 import { Button } from '@/components/common/Button';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { DangerConfirmModal } from '@/components/modals/DangerConfirmModal';
@@ -54,9 +59,16 @@ export function AbsencePage() {
   const [deleting, setDeleting] = useState<AbsenceHistoryDto | null>(null);
   const [deletingAll, setDeletingAll] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [marking, setMarking] = useState(false);
+  const [absentIds, setAbsentIds] = useState<string[]>([]);
+  const classroomId = searchParams.get('classroomId') ?? '';
 
   const { data, isLoading, isError } = useAbsenceByDepartment(branchId ?? '', departmentId, pageNumber, PAGE_SIZE);
   const processAbsences = useProcessDepartmentAbsences(branchId ?? '');
+  const markByClassroom = useMarkAttendanceByClassroom(branchId ?? '');
+  const addBulkAbsence = useAddBulkAbsence(branchId ?? '');
+  const { children, isPrimary, needsClassroom } = useSelectableChildren(branchId ?? '', departmentId, period, classroomId);
+  const kidsLateMinutes = useKidsLateMinutes(period);
   const deleteAbsence = useDeleteAbsence(branchId ?? '');
   const deleteAllAbsence = useDeleteAllAbsence(branchId ?? '');
 
@@ -64,6 +76,16 @@ export function AbsencePage() {
     const today = new Date().toISOString().slice(0, 10);
     return (data?.items ?? []).filter((i) => i.date?.slice(0, 10) === today).length;
   }, [data?.items]);
+
+  const childOptions = children.map((c) => ({ value: String(c.id), label: c.name }));
+  const validAbsentIds = absentIds.filter((id) => childOptions.some((o) => o.value === id));
+
+  const handleAbsentSelected = () => {
+    if (validAbsentIds.length === 0 || addBulkAbsence.isPending) return;
+    const now = new Date();
+    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    addBulkAbsence.mutate({ childIds: validAbsentIds, date }, { onSuccess: () => setAbsentIds([]) });
+  };
 
   if (!branchId) return <PageLoader label="برجاء اختيار فرع أولًا..." />;
 
@@ -109,8 +131,29 @@ export function AbsencePage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="w-full max-w-xs">
             <label className="mb-1 block text-xs font-medium text-neutral-500">القسم</label>
-            <DepartmentSelector branchId={branchId} value={departmentId} onChange={(v) => updateParams({ departmentId: v, page: '1' })} />
+            <DepartmentSelector
+              branchId={branchId}
+              value={departmentId}
+              workingTodayOnly
+              onChange={(v) => {
+                setAbsentIds([]);
+                updateParams({ departmentId: v, classroomId: '', page: '1' });
+              }}
+            />
           </div>
+          {departmentId && isPrimary && (
+            <div className="w-full max-w-xs">
+              <label className="mb-1 block text-xs font-medium text-neutral-500">الفصل</label>
+              <ClassSelector
+                branchId={branchId}
+                value={classroomId}
+                onChange={(v) => {
+                  setAbsentIds([]);
+                  updateParams({ classroomId: v, page: '1' });
+                }}
+              />
+            </div>
+          )}
           <div>
             <label className="mb-1 block text-xs font-medium text-neutral-500">الفترة</label>
             <PeriodSelector value={period} onChange={(p) => updateParams({ period: String(p), page: '1' })} />
@@ -119,15 +162,57 @@ export function AbsencePage() {
 
         {departmentId && (
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="secondary" icon={<UserX className="h-4 w-4" />} onClick={() => setProcessing(true)}>
-              تسجيل غياب كل من لم يحضر اليوم
-            </Button>
+            {!isPrimary && (
+              <Button variant="secondary" icon={<UserX className="h-4 w-4" />} onClick={() => setProcessing(true)}>
+                تسجيل غياب كل من لم يحضر اليوم
+              </Button>
+            )}
             <Button variant="danger" size="sm" icon={<AlertOctagon className="h-4 w-4" />} onClick={() => setDeletingAll(true)}>
               حذف كل السجلات
             </Button>
           </div>
         )}
       </div>
+
+      {departmentId && (
+        <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
+          <div className="w-full max-w-sm">
+            <MultiSelect
+              options={childOptions}
+              value={validAbsentIds}
+              onChange={setAbsentIds}
+              placeholder={
+                needsClassroom
+                  ? 'اختر الفصل أولًا'
+                  : isPrimary
+                    ? 'اختر الطلاب الغائبين، والباقي سيُسجَّل حضورهم'
+                    : 'اختر الطلاب الغائبين'
+              }
+              searchPlaceholder="ابحث باسم الطالب..."
+              emptyMessage="لا يوجد طالب بهذا الاسم"
+              disabled={needsClassroom || childOptions.length === 0}
+            />
+          </div>
+          {isPrimary ? (
+            <Button
+              icon={<ClipboardCheck className="h-4 w-4" />}
+              onClick={() => setMarking(true)}
+              disabled={needsClassroom || childOptions.length === 0 || markByClassroom.isPending}
+            >
+              {validAbsentIds.length > 0 ? `تسجيل غياب (${validAbsentIds.length}) وحضور الباقي` : 'تسجيل حضور كل الفصل'}
+            </Button>
+          ) : (
+            <Button
+              icon={<UserX className="h-4 w-4" />}
+              onClick={handleAbsentSelected}
+              isLoading={addBulkAbsence.isPending}
+              disabled={validAbsentIds.length === 0 || addBulkAbsence.isPending}
+            >
+              {validAbsentIds.length > 1 ? `تسجيل غياب (${validAbsentIds.length})` : 'تسجيل غياب'}
+            </Button>
+          )}
+        </div>
+      )}
 
       {!departmentId ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-300 bg-surface p-14 text-center">
@@ -168,6 +253,31 @@ export function AbsencePage() {
           )}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={marking}
+        onClose={() => setMarking(false)}
+        onConfirm={() =>
+          markByClassroom.mutate(
+            {
+              classroomId,
+              absentStudentIds: validAbsentIds,
+              dateTime: new Date().toISOString(),
+              lateMinutes: kidsLateMinutes,
+            },
+            {
+              onSuccess: () => {
+                setMarking(false);
+                setAbsentIds([]);
+              },
+            }
+          )
+        }
+        title="تسجيل الغياب والحضور للفصل"
+        message={`سيتم تسجيل غياب ${validAbsentIds.length} طالب وتسجيل حضور باقي طلاب الفصل. هل تريد المتابعة؟`}
+        confirmLabel="تسجيل"
+        isLoading={markByClassroom.isPending}
+      />
 
       <ConfirmModal
         isOpen={processing}

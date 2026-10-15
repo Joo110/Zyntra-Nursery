@@ -22,7 +22,6 @@ export const subscriptionKeys = {
     [...subscriptionKeys.all, 'receipt', branchId, subscriptionId] as const,
 };
 
-/** راجع 05-Caching-....md: Subscriptions staleTime = 30 ثانية */
 export function useUnpaidSubscriptions(
   branchId: string,
   period: Period,
@@ -38,7 +37,6 @@ export function useUnpaidSubscriptions(
   });
 }
 
-/** ملخص القسم: عدد الطلاب + إجمالي السعر + الأسماء (بيشتغل بس لما يتحدد قسم) */
 export function useDepartmentSubscriptionSummary(branchId: string, departmentId: string, period: Period) {
   return useQuery({
     queryKey: subscriptionKeys.departmentSummary(branchId, departmentId, period),
@@ -87,7 +85,6 @@ export function useChildrenSubscriptionInfo(
   });
 }
 
-/** جاهزة للاستخدام بمجرد ما يبقى عندنا subscriptionId من أي مصدر */
 export function useSubscriptionReceipt(branchId: string, subscriptionId: string | null) {
   return useQuery({
     queryKey: subscriptionKeys.receipt(branchId, subscriptionId ?? ''),
@@ -97,7 +94,6 @@ export function useSubscriptionReceipt(branchId: string, subscriptionId: string 
   });
 }
 
-/** راجع 03-Business-Flow.md § Subscriptions Flow - Invalidate يشمل department-financial-stats المرتبطة */
 export function useCreateSubscription(branchId: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -111,7 +107,6 @@ export function useCreateSubscription(branchId: string) {
   });
 }
 
-/** جاهزة للاستخدام بمجرد ما يبقى عندنا subscriptionId من أي مصدر */
 export function useUpdateSubscription(branchId: string) {
   const qc = useQueryClient();
   return useMutation({

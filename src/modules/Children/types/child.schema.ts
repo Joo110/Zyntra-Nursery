@@ -1,10 +1,5 @@
 import { z } from 'zod';
 
-/**
- * راجع 02-API-Contract-Detailed.md § Global Conventions — الاعتماد فقط على الحقول
- * الـ Required فعليًا بالـ Backend (Non-nullable reference types بالـ AddChildDto).
- * لا توجد قيود Backend إضافية حقيقية (Min/Max/Regex) لذا لا نخترعها هنا.
- */
 export const addChildSchema = z.object({
   name: z.string().optional(),
   city: z.string().min(1, 'المدينة مطلوبة'),
@@ -21,9 +16,7 @@ export const addChildSchema = z.object({
   socialStatus: z.coerce.number().optional(),
   messageNumber: z.string().min(1, 'رقم الرسائل مطلوب'),
   email: z.string().email('البريد الإلكتروني غير صحيح').optional().or(z.literal('')),
-  /** الباص اختياري — بعض الأطفال يحضرون بدون باص */
   busId: z.string().optional(),
-  /** مقدمة الحجز — تُسجَّل عبر Endpoint منفصل (Treasury/child/{childId}/advance-payment) وليست جزءًا من AddChildDto/UpdateChildDto */
   isAdvancePaymentMade: z.boolean().optional(),
   advancePaymentAmount: z.coerce.number().min(0, 'يجب أن يكون المبلغ رقمًا موجبًا').optional(),
 });

@@ -2,7 +2,6 @@ import { axiosInstance } from '@/services/api/axiosInstance';
 import type { PagedResult, MessageResponse } from '@/types/pagination.types';
 import type { DepartueHistoryDto } from '../types/departure.types';
 
-/** راجع 02-API-Contract-Detailed.md § 12) Departure */
 export const departureService = {
   getByDepartment: (branchId: string, departmentId: string, pageNumber: number, take: number) =>
     axiosInstance
@@ -12,6 +11,11 @@ export const departureService = {
   addForDepartmentChild: (branchId: string, departmentId: string, childId: string, dateTime: string) =>
     axiosInstance
       .post<MessageResponse>(`/branches/${branchId}/Departure/department/${departmentId}/child/${childId}`, null, { params: { dateTime } })
+      .then((res) => res.data),
+
+  addBulkToday: (branchId: string, dateTime: string) =>
+    axiosInstance
+      .post<{ message: string; insertedCount: number }>(`/branches/${branchId}/Departure/bulk-today`, null, { params: { dateTime } })
       .then((res) => res.data),
 
   remove: (branchId: string, departureId: string) =>

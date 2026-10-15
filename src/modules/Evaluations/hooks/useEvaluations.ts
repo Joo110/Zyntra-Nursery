@@ -28,7 +28,6 @@ export function useEvaluationInfo(branchId: string, classId: string, period: Per
   });
 }
 
-/** سجل التقييمات اليومية بالتاريخ */
 export function useEvaluationHistory(branchId: string, params: EvaluationHistoryParams) {
   return useQuery({
     queryKey: evaluationKeys.history(branchId, params),
@@ -121,6 +120,5 @@ export function useTruncateWinnerHistory(branchId: string) {
   });
 }
 
-// Aliases للتوافق مع الأسماء المستخدمة في EvaluationsWinnersPage
 export const useWinnersCard = useWinnerCard;
 export const useWinnersHistory = useWinnerHistory;

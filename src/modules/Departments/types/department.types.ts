@@ -5,6 +5,14 @@ export interface DepartmentListDto {
   studentCount: number;
   isActive: boolean;
   createdDate: string;
+  worksSunday: boolean;
+  worlsMonday: boolean;
+  worksTuesday: boolean;
+  worksWednesday: boolean;
+  worksThursday: boolean;
+  worksFriday: boolean;
+  worksSaturday: boolean;
+  isPrimaryDepartment: boolean;
 }
 
 export interface DepartmentDropdownDto {
@@ -20,11 +28,27 @@ export interface DepartmentDetailDto {
   activeStudentCount: number;
   isActive: boolean;
   createdDate: string;
+  worksSunday: boolean;
+  worlsMonday: boolean;
+  worksTuesday: boolean;
+  worksWednesday: boolean;
+  worksThursday: boolean;
+  worksFriday: boolean;
+  worksSaturday: boolean;
+  isPrimaryDepartment: boolean;
 }
 
 export interface AddDepartmentDto {
   departmentName: string;
   subscriptionPrice: number;
+  worksSunday: boolean;
+  worlsMonday: boolean;
+  worksTuesday: boolean;
+  worksWednesday: boolean;
+  worksThursday: boolean;
+  worksFriday: boolean;
+  worksSaturday: boolean;
+  isPrimaryDepartment: boolean;
 }
 
 export interface UpdateDepartmentDto {
@@ -32,6 +56,14 @@ export interface UpdateDepartmentDto {
   departmentName?: string | null;
   subscriptionPrice?: number | null;
   isActive?: boolean | null;
+  worksSunday?: boolean | null;
+  worlsMonday?: boolean | null;
+  worksTuesday?: boolean | null;
+  worksWednesday?: boolean | null;
+  worksThursday?: boolean | null;
+  worksFriday?: boolean | null;
+  worksSaturday?: boolean | null;
+  isPrimaryDepartment?: boolean | null;
 }
 
 export interface DepartmentFinancialStatsDto {

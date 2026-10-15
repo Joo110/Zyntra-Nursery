@@ -33,7 +33,6 @@ async function loadAllByDepartment(
   onlyPeriod?: Period,
   name?: string
 ): Promise<DeptGroup[]> {
-  // dropdown بيرجّع كل الأقسام في طلب واحد
   const departments = (await departmentService.getDropdown(branchId)) as unknown as Record<string, string>[];
 
   const targets = onlyDepartmentId ? departments.filter((d) => d.id === onlyDepartmentId) : departments;
@@ -46,9 +45,7 @@ async function loadAllByDepartment(
           fetchAll((p) => childService.getList(branchId, d.id, period, p, TAKE, name))
         )
       );
-      // إزالة التكرار لو الطالب ظهر في الفترتين
       const unique = [...new Map(lists.flat().map((c) => [c.id, c])).values()];
-      // اسم القسم: جرّب أكتر من اسم حقل محتمل
       const deptName = d.name ?? d.departmentName ?? d.title ?? d.label ?? '—';
       return { id: d.id, name: deptName, children: unique };
     })

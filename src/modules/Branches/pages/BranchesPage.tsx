@@ -20,11 +20,6 @@ import { useDebounce } from '@/hooks/useDebounce';
 
 const PAGE_SIZE = 10;
 
-/**
- * Proof of Concept — أول Module يتم تنفيذه بالكامل لإثبات صحة التكامل:
- * Axios + Types + Service + Hook + TanStack Query + Pagination + Validation +
- * Error Handling + Toast + RTL UI (راجع 07-Frontend-Implementation-Plan.md § Stage 1).
- */
 export function BranchesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const pageNumber = Number(searchParams.get('page') ?? '1');
@@ -37,7 +32,6 @@ export function BranchesPage() {
   const [editingBranch, setEditingBranch] = useState<BranchListDto | null>(null);
   const [deletingBranch, setDeletingBranch] = useState<BranchListDto | null>(null);
 
-  // مزامنة البحث مع الـ URL بعد الـ Debounce (راجع Master Prompt § 14 URL State)
   const effectiveSearch = debouncedSearch || undefined;
 
   const { data, isLoading, isError } = useBranchesList(pageNumber, PAGE_SIZE, effectiveSearch);

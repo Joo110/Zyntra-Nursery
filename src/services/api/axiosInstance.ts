@@ -3,7 +3,6 @@ import { env } from '@/app/config/env';
 import { normalizeApiError } from './errorNormalizer';
 import { authStorage } from '@/services/auth/authStorage';
 
-
 export const axiosInstance = axios.create({
   baseURL: env.apiBaseUrl,
   timeout: 30_000,

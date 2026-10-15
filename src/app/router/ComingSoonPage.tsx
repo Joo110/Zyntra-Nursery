@@ -5,7 +5,6 @@ interface ComingSoonPageProps {
   title: string;
 }
 
-
 export function ComingSoonPage({ title }: ComingSoonPageProps) {
   return (
     <div className="flex flex-col gap-6">

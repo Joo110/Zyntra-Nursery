@@ -10,7 +10,6 @@ import type {
   UpdateChildDto,
 } from '../types/child.types';
 
-/** راجع 02-API-Contract-Detailed.md § 5) Child */
 export const childService = {
   getList: (
     branchId: string,
@@ -74,6 +73,11 @@ export const childService = {
       .get<ChildBasicInfoDto[]>(`/branches/${branchId}/Child/department/${departmentId}/children`, {
         params: { period },
       })
+      .then((res) => res.data),
+
+  getClassroomChildren: (branchId: string, classroomId: string) =>
+    axiosInstance
+      .get<ChildBasicInfoDto[]>(`/branches/${branchId}/Child/classroom/${classroomId}`)
       .then((res) => res.data),
 
   add: (branchId: string, dto: AddChildDto) =>

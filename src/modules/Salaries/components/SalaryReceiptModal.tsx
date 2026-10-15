@@ -9,7 +9,6 @@ interface Props {
   onClose: () => void;
 }
 
-/** إيصال راتب — يستخدم GET /Salaries/receipt/{salaryId} الموجود بالفعل بالباك */
 export function SalaryReceiptModal({ branchId, salaryId, onClose }: Props) {
   const { data: receipt, isLoading } = useSalaryReceipt(branchId, salaryId);
 

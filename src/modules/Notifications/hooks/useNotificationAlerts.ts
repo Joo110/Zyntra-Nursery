@@ -5,17 +5,6 @@ import { NO_ALERTS, type NotificationAlertsDto } from '../types/notification.typ
 import { useDepartmentsDropdown } from '@/modules/Departments/hooks/useDepartments';
 import { Period } from '@/types/enums.types';
 
-/**
- * يفحص حالات التنبيه الأربعة المطلوبة (راجع خطة الفرونت § نظام الإشعارات):
- * - أعياد الميلاد ✅ Endpoint حقيقي موجود
- * - عدم الدفع ✅ Endpoint حقيقي موجود
- * - سن الأخ ⚠️ غير متاح بالباك حاليًا (يرجع false دائمًا)
- * - تجاوز حد الغياب ⚠️ غير متاح بالباك حاليًا (يرجع false دائمًا)
- *
- * التنفيذ الحالي "يجمّع" النتائج من عدة Endpoints موجودة فعلًا كحل مؤقت،
- * لحد ما يتوفر Endpoint موحّد GET /notifications/pending-alerts من الباك.
- * الفحص يبدأ بعد 5 ثوانٍ من تحميل الصفحة كما هو مطلوب (مؤشر مرئي غير مزعج فور الدخول).
- */
 export function useNotificationAlerts(branchId: string) {
   const [enabled, setEnabled] = useState(false);
   const { data: departments } = useDepartmentsDropdown(branchId);

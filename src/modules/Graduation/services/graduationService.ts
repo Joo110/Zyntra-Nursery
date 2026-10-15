@@ -2,7 +2,6 @@ import { axiosInstance } from '@/services/api/axiosInstance';
 import type { MessageResponse } from '@/types/pagination.types';
 import type { GraduationDto, AddGraduationDto, UpdateGraduationDto } from '../types/graduation.types';
 
-/** راجع 02-API-Contract-Detailed.md § 7) Graduation — بدون Pagination (قائمة كاملة دائمًا) */
 export const graduationService = {
   getAll: (branchId: string) =>
     axiosInstance.get<GraduationDto[]>(`/branches/${branchId}/Graduation`).then((res) => res.data),

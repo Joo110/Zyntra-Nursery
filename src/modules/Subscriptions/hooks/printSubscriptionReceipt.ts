@@ -1,4 +1,3 @@
-// utils/printSubscriptionReceipt.ts
 import { toast } from 'sonner';
 
 export interface SubscriptionReceiptData {

@@ -27,9 +27,6 @@ export const evaluationService = {
       })
       .then((res) => res.data),
 
-  /**
-   * ⚠️ الـ URL والـ params افتراضية — عدّلها لتطابق الـ action الفعلي في الكنترولر.
-   */
   getHistory: (branchId: string, p: EvaluationHistoryParams) =>
     axiosInstance
       .get<PagedResult<EvaluationHistoryDto>>(`/branches/${branchId}/Evaluations/history`, {

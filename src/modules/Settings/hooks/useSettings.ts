@@ -1,8 +1,16 @@
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { settingService } from '../services/settingService';
 import type { UpdateSettingDto } from '../types/setting.types';
 import type { ApiError } from '@/types/api-error.types';
+import {
+  SCHEDULE_CACHE_TTL_MS,
+  clearScheduleCache,
+  pickScheduleSettings,
+  readScheduleCache,
+  writeScheduleCache,
+} from '../utils/scheduleCache';
 
 export const settingKeys = { all: ['settings'] as const };
 
@@ -14,11 +22,32 @@ export function useSettings() {
   });
 }
 
+export const scheduleSettingKeys = { all: [...settingKeys.all, 'schedule'] as const };
+
+export function useScheduleSettings() {
+  const [cached] = useState(readScheduleCache);
+  return useQuery({
+    queryKey: scheduleSettingKeys.all,
+    queryFn: async () => {
+      const full = await settingService.get();
+      const schedule = pickScheduleSettings(full);
+      writeScheduleCache(schedule);
+      return schedule;
+    },
+    initialData: cached?.data,
+    initialDataUpdatedAt: cached?.fetchedAt,
+    staleTime: SCHEDULE_CACHE_TTL_MS,
+    gcTime: SCHEDULE_CACHE_TTL_MS,
+    refetchOnWindowFocus: false,
+  });
+}
+
 export function useUpdateSettings() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (dto: UpdateSettingDto) => settingService.update(dto),
     onSuccess: () => {
+      clearScheduleCache();
       qc.invalidateQueries({ queryKey: settingKeys.all, refetchType: 'all' });
       toast.success('تم حفظ الإعدادات بنجاح');
     },
@@ -26,7 +55,6 @@ export function useUpdateSettings() {
   });
 }
 
-/** POST /Setting/backup-database */
 export function useBackupDatabase() {
   return useMutation({
     mutationFn: (backupName?: string) => settingService.backupDatabase(backupName),
@@ -35,7 +63,6 @@ export function useBackupDatabase() {
   });
 }
 
-/** POST /Setting/restore-database */
 export function useRestoreDatabase() {
   return useMutation({
     mutationFn: (fileName: string) => settingService.restoreDatabase(fileName),

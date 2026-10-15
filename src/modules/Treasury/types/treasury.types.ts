@@ -18,7 +18,6 @@ export interface AddTreasuryDataDto {
   month?: string | null;
 }
 
-/** مطابق لـ UpdateTreasuryDataDto — كل الحقول اختيارية (Partial Update) */
 export interface UpdateTreasuryDataDto {
   id: string;
   amount?: number | null;
@@ -30,7 +29,6 @@ export interface UpdateTreasuryDataDto {
   month?: string | null;
 }
 
-/** مطابق لـ OverduePaymentDetailDto */
 export interface OverduePaymentDetailDto {
   originalMonth: string;
   amount: number;
@@ -39,7 +37,6 @@ export interface OverduePaymentDetailDto {
   departmentName: string;
 }
 
-/** مطابق لـ DepartmentMonthlyDetailDto */
 export interface DepartmentMonthlyDetailDto {
   departmentName: string;
   departmentIncome: number;
@@ -47,7 +44,6 @@ export interface DepartmentMonthlyDetailDto {
   departmentCollectionPercentage: number;
 }
 
-/** مطابق لـ MonthlyTreasuryReportDto */
 export interface MonthlyTreasuryReportDto {
   monthDate: string;
   totalIncome: number;
@@ -63,7 +59,6 @@ export interface MonthlyTreasuryReportDto {
   departmentDetails: DepartmentMonthlyDetailDto[];
 }
 
-/** مطابق لـ DepartmentTreasuryReportDto */
 export interface DepartmentTreasuryReportDto {
   departmentName: string;
   activeChildrenCount: number;

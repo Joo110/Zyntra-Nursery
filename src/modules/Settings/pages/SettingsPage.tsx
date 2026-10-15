@@ -14,9 +14,7 @@ import { PageLoader } from '@/components/loading/PageLoader';
 
 type FormValues = Omit<UpdateSettingDto, 'id'>;
 
-/** "HH:mm:ss" القادم من الباك -> "HH:mm" اللي بيقبله input[type=time] */
 const toTimeInput = (v?: string | null) => (v ? v.slice(0, 5) : '');
-/** "HH:mm" من input -> "HH:mm:ss" عشان يتوافق مع TimeOnly بالباك */
 const toTimeApi = (v?: string | null) => (v ? `${v}:00` : null);
 
 const defaultValues: FormValues = {
@@ -104,7 +102,6 @@ export function SettingsPage() {
           <PageLoader />
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-            {/* بيانات المنشأة */}
             <Card className="p-6">
               <h2 className="mb-4 text-sm font-semibold text-neutral-700">بيانات المنشأة</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -123,7 +120,6 @@ export function SettingsPage() {
               </div>
             </Card>
 
-            {/* مواعيد الأطفال */}
             <Card className="p-6">
               <h2 className="mb-4 text-sm font-semibold text-neutral-700">مواعيد حضور وانصراف الأطفال</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -160,7 +156,6 @@ export function SettingsPage() {
               </div>
             </Card>
 
-            {/* مواعيد المعلمين */}
             <Card className="p-6">
               <h2 className="mb-4 text-sm font-semibold text-neutral-700">مواعيد المعلمين</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -179,7 +174,6 @@ export function SettingsPage() {
               </div>
             </Card>
 
-            {/* مواعيد العمال */}
             <Card className="p-6">
               <h2 className="mb-4 text-sm font-semibold text-neutral-700">مواعيد العمال</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -198,7 +192,6 @@ export function SettingsPage() {
               </div>
             </Card>
 
-            {/* القواعد المالية وقواعد الحضور */}
             <Card className="p-6">
               <h2 className="mb-4 text-sm font-semibold text-neutral-700">القواعد المالية وقواعد الحضور</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -239,7 +232,6 @@ export function SettingsPage() {
               </label>
             </Card>
 
-            {/* الرواتب والاشتراك الافتراضي */}
             <Card className="p-6">
               <h2 className="mb-4 text-sm font-semibold text-neutral-700">الرواتب والاشتراك الافتراضي</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -255,7 +247,6 @@ export function SettingsPage() {
               </div>
             </Card>
 
-            {/* إعدادات الطباعة */}
             <Card className="p-6">
               <h2 className="mb-4 text-sm font-semibold text-neutral-700">إعدادات الطباعة</h2>
               <div className="flex flex-col gap-2">
@@ -274,7 +265,6 @@ export function SettingsPage() {
               </div>
             </Card>
 
-            {/* تكامل الرسائل SMS/WhatsApp */}
             <Card className="p-6">
               <h2 className="mb-4 text-sm font-semibold text-neutral-700">تكامل الرسائل (SMS / WhatsApp)</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -293,7 +283,6 @@ export function SettingsPage() {
               </div>
             </Card>
 
-            {/* نماذج الرسائل */}
             <Card className="p-6">
               <h2 className="mb-4 text-sm font-semibold text-neutral-700">نماذج الرسائل التلقائية</h2>
               <div className="grid grid-cols-1 gap-4">
@@ -319,7 +308,6 @@ export function SettingsPage() {
           </form>
         )}
 
-        {/* النسخ الاحتياطي واستعادة قاعدة البيانات */}
         <Card className="p-6">
           <h2 className="mb-4 text-sm font-semibold text-neutral-700">النسخ الاحتياطي وقاعدة البيانات</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

@@ -9,9 +9,6 @@ interface AuthState {
   logout: () => void;
 }
 
-/**
- * ⚠️ راجع services/auth/authStorage.ts — هذه جلسة UX-level فقط، وليست حماية حقيقية.
- */
 export const useAuthStore = create<AuthState>((set) => ({
   user: authStorage.get(),
   isAuthenticated: authStorage.get() !== null,

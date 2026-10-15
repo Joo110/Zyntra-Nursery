@@ -4,9 +4,11 @@ import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { MobileSidebar } from './MobileSidebar';
+import { useScheduleSettings } from '@/modules/Settings/hooks/useSettings';
 
 export function DashboardLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  useScheduleSettings();
 
   return (
     <div className="flex h-screen overflow-hidden bg-neutral-100" dir="rtl">

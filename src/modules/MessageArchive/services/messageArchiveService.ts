@@ -3,7 +3,6 @@ import type { PagedResult, MessageResponse } from '@/types/pagination.types';
 import { MemberTypeBodyValue } from '../../Salaries/types/enums.types';
 import type { MessageArchiveDto, AddMessageArchiveDto } from '../types/messageArchive.types';
 
-/** راجع 02-API-Contract-Detailed.md § 16) MessageArchive */
 export const messageArchiveService = {
   getList: (branchId: string, pageNumber: number, take: number) =>
     axiosInstance

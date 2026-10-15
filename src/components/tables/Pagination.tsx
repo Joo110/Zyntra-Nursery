@@ -10,10 +10,6 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-/**
- * Pagination عامة تعتمد على شكل PagedResult<T> الفعلي من الـ Backend
- * (راجع 02-API-Contract-Detailed.md § Global Conventions) — Server-side دائمًا.
- */
 export function Pagination({
   pageNumber,
   totalPages,

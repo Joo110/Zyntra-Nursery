@@ -9,7 +9,6 @@ import type {
   DepartmentFinancialStatsDto,
 } from '../types/department.types';
 
-/** راجع 02-API-Contract-Detailed.md § 2) Department */
 export const departmentService = {
   getList: (branchId: string, pageNumber: number, take: number, searchName?: string) =>
     axiosInstance
@@ -21,6 +20,11 @@ export const departmentService = {
   getDropdown: (branchId: string) =>
     axiosInstance
       .get<DepartmentDropdownDto[]>(`/branches/${branchId}/Department/dropdown`)
+      .then((res) => res.data),
+
+  getDropdownForAbsence: (branchId: string) =>
+    axiosInstance
+      .get<DepartmentDropdownDto[]>(`/branches/${branchId}/Department/dropdown-for-abcense`)
       .then((res) => res.data),
 
   getById: (branchId: string, departmentId: string) =>

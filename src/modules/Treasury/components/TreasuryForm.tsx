@@ -18,11 +18,6 @@ interface Props {
   onCancel: () => void;
 }
 
-/**
- * راجع 03-Business-Flow.md § Treasury Flow — MemberType أولًا، ثم اختيار العضو الفعلي
- * (Polymorphic MemberId+MemberType pattern). لا يوجد حقل TreasuryKind بالإضافة اليدوية
- * (فقط TrunsactionType دخل/صرف) — راجع 02-API-Contract-Detailed.md § 15.
- */
 export function TreasuryForm({ branchId, departmentId, onSubmit, isLoading, onCancel }: Props) {
   const [memberType, setMemberType] = useState<MemberType>(MemberType.Child);
   const { register, handleSubmit, control, formState: { errors } } = useForm({

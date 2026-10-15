@@ -1,4 +1,3 @@
-/** مطابق تمامًا لـ ChildAssessmentDto بالباك */
 export interface ChildAssessmentDto {
   id: string;
   childId: string;
@@ -13,7 +12,6 @@ export interface ChildAssessmentDto {
   assessmentDate: string;
 }
 
-/** مطابق لـ AddChildAssessmentDto — assessmentDate مطلوب (Non-nullable بالباك) */
 export interface AddChildAssessmentDto {
   childId: string;
   departmentId: string;
@@ -25,7 +23,6 @@ export interface AddChildAssessmentDto {
   assessmentDate: string;
 }
 
-/** مطابق لـ UpdateChildAssessmentDto */
 export interface UpdateChildAssessmentDto {
   id: string;
   currentLevel?: string | null;
@@ -35,7 +32,6 @@ export interface UpdateChildAssessmentDto {
   notes?: string | null;
 }
 
-/** مطابق لـ ChildAssessmentHistoryDto */
 export interface ChildAssessmentHistoryDto {
   id: string;
   currentLevel: string;
@@ -46,7 +42,6 @@ export interface ChildAssessmentHistoryDto {
   notes?: string | null;
 }
 
-/** مطابق لـ ChildDepartmentProgressDto */
 export interface ChildDepartmentProgressDto {
   childId: string;
   childName?: string | null;

@@ -1,8 +1,6 @@
 import type { AxiosError } from 'axios';
 import type { ApiError } from '@/types/api-error.types';
 
-
-
 const GENERIC_MESSAGES: Record<number, string> = {
   400: 'البيانات المُدخلة غير صحيحة، برجاء المراجعة والمحاولة مرة أخرى.',
   401: 'يجب تسجيل الدخول لتنفيذ هذه العملية.',
@@ -38,7 +36,6 @@ export function normalizeApiError(error: unknown): ApiError {
   const status = axiosError.response.status;
   const data = axiosError.response.data;
 
-
   if (data && typeof data === 'object' && 'error' in data && data.error?.message) {
     return {
       status,
@@ -47,7 +44,6 @@ export function normalizeApiError(error: unknown): ApiError {
       code: data.error.code,
     };
   }
-
 
   if (
     status === 400 &&

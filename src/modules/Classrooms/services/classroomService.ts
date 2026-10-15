@@ -2,7 +2,6 @@ import { axiosInstance } from '@/services/api/axiosInstance';
 import type { PagedResult, MessageResponse } from '@/types/pagination.types';
 import type { ClassMenuDto, AddClassroomDto, UpdateClassroomDto } from '../types/classroom.types';
 
-/** راجع 02-API-Contract-Detailed.md § 3) Classroom */
 export const classroomService = {
   getList: (branchId: string, pageNumber: number, take: number) =>
     axiosInstance

@@ -2,7 +2,6 @@ import { axiosInstance } from '@/services/api/axiosInstance';
 import type { PagedResult, MessageResponse } from '@/types/pagination.types';
 import type { LevelDto, AddLevelDto, UpdateLevelDto } from '../types/level.types';
 
-/** راجع 02-API-Contract-Detailed.md § 4) Level */
 export const levelService = {
   getList: (branchId: string, pageNumber: number, take: number) =>
     axiosInstance

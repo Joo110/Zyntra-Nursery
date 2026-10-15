@@ -5,7 +5,6 @@ import { branchKeys } from '@/constants/queryKeys.constants';
 import type { AddBranchDto, UpdateBranchDto } from '../types/branch.types';
 import type { ApiError } from '@/types/api-error.types';
 
-/** راجع 05-Caching-Pagination-Search-Filtering.md: Branches staleTime طويل (10 دقائق) - بيانات شبه ثابتة */
 export function useBranchesList(pageNumber: number, take: number, searchName?: string) {
   return useQuery({
     queryKey: branchKeys.list(pageNumber, take, searchName),

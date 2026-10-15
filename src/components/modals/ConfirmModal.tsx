@@ -12,10 +12,6 @@ interface ConfirmModalProps {
   confirmLabel?: string;
 }
 
-/**
- * تأكيد قياسي لعمليات الحذف العادية (عنصر واحد) — راجع Master Prompt § 20 Delete Confirmation.
- * للعمليات المدمّرة (Delete All, Reset) استخدم DangerConfirmModal بدلًا من هذا.
- */
 export function ConfirmModal({
   isOpen,
   onClose,

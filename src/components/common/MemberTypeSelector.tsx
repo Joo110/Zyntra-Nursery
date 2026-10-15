@@ -6,7 +6,6 @@ interface MemberTypeSelectorProps {
   onChange: (value: MemberType) => void;
 }
 
-
 export function MemberTypeSelector({ value, onChange }: MemberTypeSelectorProps) {
   return (
     <div className="inline-flex rounded-md border border-neutral-300 bg-white p-0.5">

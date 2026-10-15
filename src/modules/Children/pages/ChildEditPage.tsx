@@ -10,11 +10,6 @@ import { useBranchStore } from '@/app/providers/branchStore';
 import { PageLoader } from '@/components/loading/PageLoader';
 import { ROUTES } from '@/app/router/routes.constants';
 
-/**
- * ✅ تحديث: الباك أضاف GET /branches/{branchId}/Child/{id} (يرجع ChildDetailsDto)،
- * لذلك أصبح ممكنًا جلب بيانات الطالب مباشرة بمعرّفه بدل الاعتماد على Navigation State
- * كما كان معمولًا سابقًا (كانت هذه الشاشة تعرض رسالة "Endpoint غير موجود" قبل هذا التحديث).
- */
 export function ChildEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -52,7 +47,6 @@ export function ChildEditPage() {
       },
       {
         onSuccess: () => {
-          // المقدمة تُسجَّل عبر Endpoint منفصل تمامًا عن تعديل بيانات الطفل نفسها
           if (values.isAdvancePaymentMade && values.advancePaymentAmount && values.advancePaymentAmount > 0) {
             markAdvancePayment.mutate(
               { childId: id, amount: values.advancePaymentAmount },

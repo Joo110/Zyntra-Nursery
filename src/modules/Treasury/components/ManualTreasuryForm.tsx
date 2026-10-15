@@ -14,10 +14,6 @@ interface Props {
   onCancel: () => void;
 }
 
-/**
- * شاشة الإيداع/السحب اليدوي — لتسجيل أموال جانبية (إيراد إضافي أو مصروف إضافي)
- * لا تخص طفل/معلم/عامل بعينه، باستخدام نفس Endpoint العام لإضافة حركة خزينة.
- */
 export function ManualTreasuryForm({ onSubmit, isLoading, onCancel }: Props) {
   const { register, handleSubmit, control, formState: { errors } } = useForm({
     resolver: zodResolver(manualTreasurySchema),

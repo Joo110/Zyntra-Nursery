@@ -23,7 +23,6 @@ import { Period } from '@/types/enums.types';
 
 const PAGE_SIZE = 10;
 
-/** المكان الوحيد اللي بنقرأ منه id الاشتراك. عدّله هنا لو الحقل اسمه مختلف. */
 function getSubscriptionId(row: PaymentSubscriptionInfoDto | null): string | null {
   if (!row) return null;
   const r = row as PaymentSubscriptionInfoDto & { id?: string };
@@ -53,7 +52,6 @@ export function SubscriptionsPage() {
   );
   const updateSubscription = useUpdateSubscription(branchId ?? '');
 
-  // ── الإنزال التلقائي لاشتراكات الشهر ──
   const generate = useGenerateMonthlySubscriptions(branchId ?? '');
   const autoRan = useRef(false);
 
@@ -68,7 +66,6 @@ export function SubscriptionsPage() {
         if (total > 0 && failed === 0) localStorage.setItem(flagKey, '1');
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [branchId]);
 
   if (!branchId) return <PageLoader label="برجاء اختيار فرع أولًا..." />;

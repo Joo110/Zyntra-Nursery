@@ -3,7 +3,6 @@ function readEnvVar(key: string, fallback?: string): string {
   const value = import.meta.env[key] as string | undefined;
   if (!value) {
     if (fallback !== undefined) return fallback;
-    // eslint-disable-next-line no-console
     console.warn(`[env] Missing environment variable: ${key}`);
     return '';
   }

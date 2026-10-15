@@ -1,6 +1,5 @@
 import type { Gender, UserRole } from '@/types/enums.types';
 
-/** مطابق تمامًا لـ LoggedInStaffDto */
 export interface LoggedInStaffDto {
   userId: string;
   userName: string;
@@ -9,7 +8,6 @@ export interface LoggedInStaffDto {
   lastLoginAt: string; // ISO DateTime
 }
 
-/** مطابق لـ UserListDto */
 export interface UserListDto {
   id: string;
   name: string;
@@ -21,7 +19,6 @@ export interface UserListDto {
   lastLoginAt?: string | null;
 }
 
-/** مطابق لـ UserDetailDto */
 export interface UserDetailDto {
   id: string;
   name: string;
@@ -36,7 +33,6 @@ export interface UserDetailDto {
   lastLoginAt?: string | null;
 }
 
-/** مطابق لـ AddUserDto */
 export interface AddUserDto {
   name: string;
   userName: string;
@@ -49,7 +45,6 @@ export interface AddUserDto {
   isActive: boolean;
 }
 
-/** مطابق لـ UpdateUserDto */
 export interface UpdateUserDto {
   id: string;
   name?: string | null;

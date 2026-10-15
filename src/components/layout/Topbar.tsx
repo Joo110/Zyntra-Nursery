@@ -68,7 +68,6 @@ export function Topbar({ onOpenMobileMenu }: TopbarProps) {
       </div>
 
       <div className="flex items-center gap-2 md:gap-4">
-        {/* الوقت والتاريخ */}
         <div className="hidden flex-col items-end leading-tight lg:flex">
           <span className="text-sm font-medium text-neutral-900">{timeLabel}</span>
           <span className="text-xs text-neutral-500">{dateLabel}</span>

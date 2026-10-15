@@ -5,7 +5,6 @@ import { departmentKeys } from '@/constants/queryKeys.constants';
 import type { AddDepartmentDto, UpdateDepartmentDto } from '../types/department.types';
 import type { ApiError } from '@/types/api-error.types';
 
-/** راجع 05-Caching-....md: Departments staleTime = 5 دقائق */
 export function useDepartmentsList(branchId: string, pageNumber: number, take: number, searchName?: string) {
   return useQuery({
     queryKey: departmentKeys.list(branchId, pageNumber, take, searchName),
@@ -22,6 +21,22 @@ export function useDepartmentsDropdown(branchId: string) {
     enabled: !!branchId,
     staleTime: 5 * 60_000,
   });
+}
+
+export function useTodayDepartmentsDropdown(branchId: string, enabled = true) {
+  return useQuery({
+    queryKey: departmentKeys.absenceDropdown(branchId),
+    queryFn: () => departmentService.getDropdownForAbsence(branchId),
+    enabled: !!branchId && enabled,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
+  });
+}
+
+export function useIsPrimaryDepartment(branchId: string, departmentId: string) {
+  const { data, isLoading } = useDepartmentsList(branchId, 1, 100);
+  const isPrimary = !!departmentId && (data?.items ?? []).some((d) => d.id === departmentId && d.isPrimaryDepartment);
+  return { isPrimary, isLoading };
 }
 
 export function useDepartmentFinancialStats(branchId: string, departmentId: string) {

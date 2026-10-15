@@ -26,7 +26,6 @@ export interface UpdateWorkerDto {
   period?: Period | null;
 }
 
-
 export interface WorkerDetailsDto {
   id: string;
   name: string;

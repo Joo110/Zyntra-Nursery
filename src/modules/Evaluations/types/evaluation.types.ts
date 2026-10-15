@@ -22,10 +22,6 @@ export interface EvaluationAverageDto {
   className: string;
 }
 
-/**
- * ⚠️ شكل افتراضي لرد endpoint سجل التقييمات اليومية.
- * لو الـ DTO عندك مختلف عدّل هنا بس.
- */
 export interface EvaluationHistoryDto {
   id: string;
   date: string;

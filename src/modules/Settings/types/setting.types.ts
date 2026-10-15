@@ -1,8 +1,6 @@
-/** مطابق للـ Entity اللي بيرجع من GET /Setting بالكامل */
 export interface SettingDto {
   id: string;
 
-  // مواعيد حضور/انصراف الأطفال (صباحي/مسائي)
   timeEnter: string;
   timeEnterPm: string;
   lasttimeEnter: string;
@@ -14,19 +12,16 @@ export interface SettingDto {
   timeLateForKids: string;
   timeLateForKidsPm: string;
 
-  // مواعيد المعلمين
   timeEnterForTeacher: string;
   timeEnterForTeacherPm: string;
   timeLateForTeachers: string;
   timeLateForTeachersPm: string;
 
-  // مواعيد العمال
   timeEnterForWorker: string;
   timeEnterForWorkerPm: string;
   timeLateForWorkers: string;
   timeLateForWorkersPm: string;
 
-  // قواعد مالية / حضور
   daysLateToPay: number;
   daysKindsAbsence: number;
   kidsBratherAge: number;
@@ -42,25 +37,21 @@ export interface SettingDto {
   workerSalary: number;
   childSubscriptionAmount: number;
 
-  // بيانات المنشأة
   orgName?: string | null;
   managerName?: string | null;
   logoPath?: string | null;
   packupPath?: string | null;
   orgEmail?: string | null;
 
-  // إعدادات الطباعة
   smallPaper: boolean;
   askBeforPrint: boolean;
   showBeforPrint: boolean;
 
-  // تكامل الرسائل (SMS/WhatsApp)
   smsNumber?: string | null;
   smsNumberAPIKey?: string | null;
   whatsAppNumber?: string | null;
   whatsAppNumberAPIKey?: string | null;
 
-  // نماذج الرسائل النصية
   subMessage?: string | null;
   absenceMessage?: string | null;
   brothersAgeMessage?: string | null;
@@ -70,7 +61,6 @@ export interface SettingDto {
   mode: boolean;
 }
 
-/** مطابق لـ UpdateSettingDto — تحديث جزئي (Only provided fields will be updated) */
 export interface UpdateSettingDto {
   id: string;
 

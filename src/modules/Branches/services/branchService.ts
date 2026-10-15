@@ -2,9 +2,6 @@ import { axiosInstance } from '@/services/api/axiosInstance';
 import type { PagedResult, MessageResponse } from '@/types/pagination.types';
 import type { BranchListDto, BranchDropdownDto, AddBranchDto, UpdateBranchDto } from '../types/branch.types';
 
-/**
- * راجع 02-API-Contract-Detailed.md § 1) Branch
- */
 export const branchService = {
   getList: (pageNumber: number, take: number, searchName?: string) =>
     axiosInstance

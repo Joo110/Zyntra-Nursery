@@ -2,7 +2,6 @@ import { axiosInstance } from '@/services/api/axiosInstance';
 import type { PagedResult, MessageResponse } from '@/types/pagination.types';
 import type { RegisterDto } from '../types/register.types';
 
-/** راجع 02-API-Contract-Detailed.md § 17) RegistersOperation */
 export const registerService = {
   getList: (pageNumber: number, take: number) =>
     axiosInstance

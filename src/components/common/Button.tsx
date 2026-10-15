@@ -27,7 +27,6 @@ const sizeClasses: Record<Size, string> = {
   lg: 'h-12 px-6 text-base gap-2',
 };
 
-
 export function Button({
   variant = 'primary',
   size = 'md',

@@ -2,7 +2,6 @@ import { axiosInstance } from '@/services/api/axiosInstance';
 import type { PagedResult, MessageResponse } from '@/types/pagination.types';
 import type { BusListDto, BusDropdownDto, AddBusDto, UpdateBusDto } from '../types/bus.types';
 
-/** راجع BusController بالباك (Zyntra.School.API/Controllers/BusController.cs) */
 export const busService = {
   getList: (branchId: string, pageNumber: number, take: number, searchName?: string) =>
     axiosInstance

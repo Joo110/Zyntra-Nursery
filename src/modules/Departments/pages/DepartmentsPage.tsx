@@ -10,6 +10,7 @@ import {
 import { DepartmentForm } from '../components/DepartmentForm';
 import type { DepartmentListDto } from '../types/department.types';
 import type { AddDepartmentFormValues } from '../types/department.schema';
+import { WEEKDAYS } from '../constants/weekdays';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
 import { Pagination } from '@/components/tables/Pagination';
 import { SearchInput } from '@/components/common/SearchInput';
@@ -75,6 +76,24 @@ export function DepartmentsPage() {
       key: 'subscriptionPrice',
       header: 'سعر الاشتراك',
       render: (row) => <span className="ltr-numerals">{row.subscriptionPrice.toLocaleString('ar-EG')} ج.م</span>,
+    },
+    {
+      key: 'isPrimaryDepartment',
+      header: 'النوع',
+      render: (row) =>
+        row.isPrimaryDepartment ? (
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">أساسي</span>
+        ) : (
+          <span className="text-neutral-400">عادي</span>
+        ),
+    },
+    {
+      key: 'workDays',
+      header: 'أيام العمل',
+      render: (row) => {
+        const days = WEEKDAYS.filter((d) => row[d.key]).map((d) => d.label);
+        return days.length > 0 ? <span className="text-xs text-neutral-600">{days.join('، ')}</span> : <span className="text-neutral-400">—</span>;
+      },
     },
     { key: 'studentCount', header: 'عدد الطلاب', render: (row) => <span className="ltr-numerals">{row.studentCount}</span> },
     { key: 'isActive', header: 'الحالة', render: (row) => <StatusBadge status={row.isActive ? 'active' : 'inactive'} /> },

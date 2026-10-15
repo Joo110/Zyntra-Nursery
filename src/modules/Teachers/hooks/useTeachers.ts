@@ -20,7 +20,6 @@ export function useTeachersList(branchId: string, pageNumber: number, take: numb
   });
 }
 
-/** جلب بيانات معلم واحد بالتفصيل (للعرض/التعديل) */
 export function useTeacher(branchId: string, id: string | undefined) {
   return useQuery({
     queryKey: teacherKeys.detail(branchId, id ?? ''),

@@ -33,7 +33,6 @@ import { MemberType, TrunsactionType } from '@/types/enums.types';
 
 const PAGE_SIZE = 10;
 
-/** غير مربوط بعضو (طفل/معلم/عامل) — يُستخدم لعمليات المصاريف/الإيرادات الجانبية اليدوية */
 const MANUAL_ENTRY_MEMBER_TYPE = 0 as unknown as MemberType;
 const MANUAL_ENTRY_MEMBER_ID = '00000000-0000-0000-0000-000000000000';
 
@@ -57,20 +56,15 @@ export function TreasuryPage() {
 
   const now = new Date();
 
-  // ---- شهور متاحة (GET /Treasury/months) — تُستخدم لملء قائمة اختيار الشهر في العرض السنوي
   const { data: availableMonths } = useAvailableMonths(branchId ?? '', departmentId || undefined);
 
-  // ---- تقرير الخزنة الشهري (GET /Treasury/report/monthly)
   const { data: monthlyReport } = useMonthlyTreasuryReport(branchId ?? '', now.getFullYear(), now.getMonth() + 1);
 
-  // ---- تقرير الأقسام (GET /Treasury/departments/report)
   const { data: deptReport } = useDepartmentsTreasuryReport(branchId ?? '');
 
-  // ---- إجمالي وتصنيف خزينة القسم المختار (GET /Treasury/department/{id}/total, /by-type)
   const { data: deptTotal } = useDepartmentTreasuryTotal(branchId ?? '', departmentId);
   const { data: deptByType } = useDepartmentTreasuryByType(branchId ?? '', departmentId);
 
-  // ---- الحركات الشهرية (GET /Treasury/monthly و /Treasury/monthly/order)
   const monthlyPlain = useTreasuryMonthly(branchId ?? '', pageNumber, PAGE_SIZE, undefined, departmentId || undefined);
   const monthlyByType = useTreasuryMonthlyOrder(
     branchId ?? '',
@@ -81,7 +75,6 @@ export function TreasuryPage() {
     departmentId || undefined
   );
 
-  // ---- الحركات السنوية (GET /Treasury/yearly, /yearly/month, /yearly/type, /yearly/type/month)
   const yearlyGeneral = useTreasuryYearly(
     branchId ?? '',
     pageNumber,
@@ -116,15 +109,10 @@ export function TreasuryPage() {
     departmentId || undefined
   );
 
-  /**
-   * اختيار الاستعلام النشط حسب الفلاتر المختارة، عشان نستخدم كل Endpoint في حالته
-   * الصحيحة بدل ما نعتمد بس على /yearly العام لكل الحالات.
-   */
   const activeQuery = useMemo(() => {
     if (viewMode === 'monthly') {
       return transactionFilter === 'all' ? monthlyPlain : monthlyByType;
     }
-    // viewMode === 'yearly'
     if (transactionFilter !== 'all' && selectedMonth && selectedDay) return yearlyByTypeAndMonth;
     if (transactionFilter !== 'all' && !selectedMonth) return yearlyByType;
     if (selectedMonth && !selectedDay) return yearlyByMonth;
@@ -159,10 +147,6 @@ export function TreasuryPage() {
     );
   };
 
-  /**
-   * عملية إيداع/سحب يدوي — تستخدم نفس Endpoint العام (POST /Treasury) بدون تحديد عضو حقيقي،
-   * فيحسبها الباك تلقائيًا كـ AdditionalRevenue أو AdditionalExpenses (راجع TreasuryService.DetermineTreasuryKind).
-   */
   const handleManualSubmit = (values: ManualTreasuryFormValues) => {
     if (!userId) return;
     createManualEntry.mutate(
@@ -214,7 +198,6 @@ export function TreasuryPage() {
         </div>
       )}
 
-      {/* فلاتر العرض */}
       <div className="flex flex-col gap-3 rounded-lg border border-neutral-200 bg-surface p-3">
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1">
@@ -289,7 +272,6 @@ export function TreasuryPage() {
           </div>
         </div>
 
-        {/* إحصائيات القسم المختار (department/total + department/by-type) */}
         {departmentId && (deptTotal !== undefined || deptByType) && (
           <div className="flex flex-wrap gap-3 border-t border-neutral-100 pt-3">
             {deptTotal !== undefined && (
@@ -306,7 +288,6 @@ export function TreasuryPage() {
         )}
       </div>
 
-      {/* تقرير الأقسام (departments/report) */}
       <div className="rounded-lg border border-neutral-200 bg-surface">
         <button
           type="button"

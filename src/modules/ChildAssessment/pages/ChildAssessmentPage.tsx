@@ -14,7 +14,6 @@ import { useBranchStore } from '@/app/providers/branchStore';
 import { PageLoader } from '@/components/loading/PageLoader';
 import { Period, PeriodLabels } from '@/types/enums.types';
 
-
 export function ChildAssessmentPage() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id);
   const [departmentId, setDepartmentId] = useState('');

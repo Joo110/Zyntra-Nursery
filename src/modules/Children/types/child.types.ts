@@ -1,6 +1,5 @@
 import type { Gender, Period } from '@/types/enums.types';
 
-/** مطابق لـ ChildListDto */
 export interface ChildListDto {
   id: string;
   name: string | null;
@@ -32,13 +31,11 @@ export interface ChildDetailsDto {
   email: string | null;
   isActive: boolean;
   departmentIds: string[];
-  /** ⚠️ يتطلب إضافة الحقلين في ChildDetailsDto بالـ Backend (راجع خطة الفرونت § 5) */
   busId?: string | null;
   isAdvancePaymentMade?: boolean;
   advancePaymentAmount?: number;
 }
 
-/** مطابق لـ ChildBirthDateNotificationDto */
 export interface ChildBirthDateNotificationDto {
   id: string;
   name: string | null;
@@ -46,16 +43,11 @@ export interface ChildBirthDateNotificationDto {
   messageNumber: string;
 }
 
-/** مطابق لـ ChildBasicInfoDto */
 export interface ChildBasicInfoDto {
   id: string;
   name: string;
 }
 
-/**
- * مطابق لـ AddChildDto بعد إزالة سعر الاشتراك (subscirptionAmount) من الباك اند.
- * الخطأ الإملائي الأصلي (dateOfSubscraip) محفوظ عمدًا.
- */
 export interface AddChildDto {
   name?: string | null;
   city: string;
@@ -74,7 +66,6 @@ export interface AddChildDto {
   email?: string | null;
 }
 
-/** مطابق لـ UpdateChildDto */
 export interface UpdateChildDto {
   id: string;
   name?: string | null;
@@ -90,6 +81,5 @@ export interface UpdateChildDto {
   period?: Period | null;
   messageNumber?: string | null;
   email?: string | null;
-  /** حقل موجود بالفعل في UpdateChildDto بالباك ولم يكن مستخدمًا بالفرونت */
   busId?: string | null;
 }

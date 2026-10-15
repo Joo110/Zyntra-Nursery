@@ -44,7 +44,6 @@ export async function generateMonthlySubscriptions(branchId: string): Promise<Ge
   const lastDay = String(new Date(y, now.getMonth() + 1, 0).getDate()).padStart(2, '0');
   const monthEnd = `${currentMonth}-${lastDay}`;
 
-  // 1) كل الطلاب + مبلغ اشتراكهم (بدون تكرار)
   const childrenRaw = (
     await Promise.all(
       PERIODS.map((period) =>
@@ -58,7 +57,6 @@ export async function generateMonthlySubscriptions(branchId: string): Promise<Ge
     return { total: 0, created: 0, failed: 0, skipped: 0 };
   }
 
-  // 2) اللي ليهم اشتراك غير مدفوع في الشهر ده
   const unpaid = (
     await Promise.all(
       PERIODS.map((period) =>
@@ -67,7 +65,6 @@ export async function generateMonthlySubscriptions(branchId: string): Promise<Ge
     )
   ).flat();
 
-  // 3) اللي دفعوا في الشهر ده
   const paid = await fetchAll((p) =>
     subscriptionService.getPaymentHistoryByDateRange(branchId, monthStart, monthEnd, p, TAKE)
   );
@@ -77,7 +74,6 @@ export async function generateMonthlySubscriptions(branchId: string): Promise<Ge
     ...paid.map((h) => h.code),
   ]);
 
-  // ⚠️ بافتراض إن code = childId
   const toCreate = children.filter((c) => !alreadyHave.has(c.code) && c.subscriptionAmount > 0);
 
   const failed = await runInBatches(toCreate, 5, (c) =>
