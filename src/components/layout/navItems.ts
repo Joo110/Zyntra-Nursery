@@ -21,10 +21,23 @@ import {
   ClipboardList,
   Bus,
   UserCog,
+  type LucideIcon,
 } from 'lucide-react';
 import { ROUTES } from '@/app/router/routes.constants';
 
-export const navGroups = [
+export type NavItem = {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  end?: boolean;
+};
+
+export type NavGroup = {
+  label: string;
+  items: NavItem[];
+};
+
+export const navGroups: NavGroup[] = [
   {
     label: 'عام',
     items: [
@@ -71,7 +84,7 @@ export const navGroups = [
       { to: ROUTES.STAFF_ATTENDANCE, label: 'حضور الموظفين', icon: UserCog },
       { to: ROUTES.ABSENCE, label: 'الغياب', icon: UserX },
       { to: ROUTES.DEPARTURE, label: 'الانصراف', icon: LogOut },
-      { to: ROUTES.EVALUATIONS, label: 'تقييم اليوم', icon: Trophy },
+      { to: ROUTES.EVALUATIONS, label: 'تقييم اليوم', icon: Trophy, end: true },
       { to: ROUTES.EVALUATIONS_HISTORY, label: 'سجل التقييمات', icon: History },
     ],
   },

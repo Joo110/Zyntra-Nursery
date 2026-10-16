@@ -23,30 +23,30 @@ export function Sidebar() {
         collapsed ? 'w-[72px]' : 'w-64'
       )}
     >
-   <div
-  className={cn(
-    'flex shrink-0 items-center gap-2 border-b border-neutral-200 px-3',
-    collapsed ? 'h-auto flex-col py-3' : 'h-16'
-  )}
->
-  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary">
-    <img src="/logo.jpeg" alt="Zyntra" className="h-full w-full object-cover" />
-  </div>
-  {!collapsed && <span className="text-lg font-bold text-neutral-900">Zyntra</span>}
+      <div
+        className={cn(
+          'flex shrink-0 items-center gap-2 border-b border-neutral-200 px-3',
+          collapsed ? 'h-auto flex-col py-3' : 'h-16'
+        )}
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary">
+          <img src="/logo.jpeg" alt="Zyntra" className="h-full w-full object-cover" />
+        </div>
+        {!collapsed && <span className="text-lg font-bold text-neutral-900">Zyntra</span>}
 
-  <button
-    type="button"
-    onClick={() => setCollapsed((prev) => !prev)}
-    className={cn(
-      'flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900',
-      collapsed ? 'mt-2' : 'ms-auto'
-    )}
-    aria-label={collapsed ? 'فتح القائمة الجانبية' : 'طي القائمة الجانبية'}
-    title={collapsed ? 'فتح القائمة' : 'طي القائمة'}
-  >
-    {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
-  </button>
-</div>
+        <button
+          type="button"
+          onClick={() => setCollapsed((prev) => !prev)}
+          className={cn(
+            'flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900',
+            collapsed ? 'mt-2' : 'ms-auto'
+          )}
+          aria-label={collapsed ? 'فتح القائمة الجانبية' : 'طي القائمة الجانبية'}
+          title={collapsed ? 'فتح القائمة' : 'طي القائمة'}
+        >
+          {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+        </button>
+      </div>
 
       <nav className="flex flex-1 flex-col gap-4 p-3">
         {navGroups.map((group) => (
@@ -55,10 +55,11 @@ export function Sidebar() {
               <p className="mb-1 px-3 text-xs font-semibold text-neutral-400">{group.label}</p>
             )}
             <div className="flex flex-col gap-1">
-              {group.items.map(({ to, label, icon: Icon }) => (
+              {group.items.map(({ to, label, icon: Icon, end }) => (
                 <NavLink
                   key={to}
                   to={to}
+                  end={end}
                   title={collapsed ? label : undefined}
                   className={({ isActive }) =>
                     cn(
