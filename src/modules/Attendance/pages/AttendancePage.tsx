@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Trash2, UserCheck, AlertOctagon, Clock, Users, ClipboardList } from 'lucide-react';
+import { Trash2, UserCheck, AlertOctagon, Clock, Users, ClipboardList, Lock, Eye } from 'lucide-react';
 import { useAttendanceByDepartment, useAddBulkAttendance, useDeleteAttendance, useDeleteAllAttendance } from '../hooks/useAttendance';
 import { useSelectableChildren } from '@/modules/Children/hooks/useChildren';
 import { useAttendanceWindow, useKidsLateMinutes } from '@/modules/Settings/hooks/useScheduleRules';
-import { ClosedWindowNotice } from '@/components/common/ClosedWindowNotice';
 import { ClassSelector } from '@/components/common/ClassSelector';
 import type { AttendanceHistoryDto } from '../types/attendance.types';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
@@ -20,6 +19,7 @@ import { PageLoader } from '@/components/loading/PageLoader';
 import { Period } from '@/types/enums.types';
 
 const PAGE_SIZE = 10;
+const ALL_RECORDS_TAKE = 1000;
 const LATE_THRESHOLD_MINUTES = 15;
 
 function formatDateTime(date: string, time?: string): string {
@@ -75,6 +75,22 @@ function LateBadge({ minutes }: { minutes: number }) {
   );
 }
 
+function ClosedBanner() {
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+        <Lock className="h-4 w-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-amber-900">تسجيل الحضور مغلق حاليًا</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-amber-800">
+          يمكنك مراجعة سجلات الحضور فقط. التسجيل والحذف متاحان خلال مواعيد الحضور.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function AttendancePage() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -88,6 +104,8 @@ export function AttendancePage() {
   const [deletingAll, setDeletingAll] = useState(false);
 
   const { data, isLoading, isError } = useAttendanceByDepartment(branchId ?? '', departmentId, pageNumber, PAGE_SIZE);
+  const { data: allAttendance } = useAttendanceByDepartment(branchId ?? '', departmentId, 1, ALL_RECORDS_TAKE);
+
   const { children, isPrimary, needsClassroom } = useSelectableChildren(branchId ?? '', departmentId, period, classroomId);
   const attendanceWindow = useAttendanceWindow('enter');
   const kidsLateMinutes = useKidsLateMinutes(period);
@@ -95,9 +113,11 @@ export function AttendancePage() {
   const deleteAttendance = useDeleteAttendance(branchId ?? '');
   const deleteAllAttendance = useDeleteAllAttendance(branchId ?? '');
 
+  const isClosed = !attendanceWindow.isOpen;
+
   const attendedNames = useMemo(
-    () => new Set((data?.items ?? []).map((i) => i.name?.trim().toLowerCase()).filter(Boolean)),
-    [data?.items]
+    () => new Set((allAttendance?.items ?? data?.items ?? []).map((i) => i.name?.trim().toLowerCase()).filter(Boolean)),
+    [allAttendance?.items, data?.items]
   );
   const availableChildren = useMemo(
     () => children.filter((c) => !attendedNames.has(c.name?.trim().toLowerCase())),
@@ -114,13 +134,11 @@ export function AttendancePage() {
     return selectedChildIds.filter((id) => ids.has(id));
   }, [selectedChildIds, childOptions]);
 
+  const allSelected = childOptions.length > 0 && validSelectedIds.length === childOptions.length;
+
   const lateCount = useMemo(() => (data?.items ?? []).filter((i) => (i.late ?? 0) > 0).length, [data?.items]);
 
   if (!branchId) return <PageLoader label="برجاء اختيار فرع أولًا..." />;
-
-  if (!attendanceWindow.isOpen) {
-    return <ClosedWindowNotice title="الحضور" actionLabel="الحضور" slots={attendanceWindow.slots} />;
-  }
 
   const updateParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams);
@@ -128,8 +146,12 @@ export function AttendancePage() {
     setSearchParams(params);
   };
 
+  const handleToggleAll = () => {
+    setSelectedChildIds(allSelected ? [] : childOptions.map((o) => o.value));
+  };
+
   const handleRegisterAttendance = () => {
-    if (validSelectedIds.length === 0 || !departmentId || addBulkAttendance.isPending) return;
+    if (isClosed || validSelectedIds.length === 0 || !departmentId || addBulkAttendance.isPending) return;
     addBulkAttendance.mutate(
       { departmentId, childIds: validSelectedIds, dateTime: new Date().toISOString(), lateMinutes: kidsLateMinutes },
       { onSuccess: () => setSelectedChildIds([]) }
@@ -159,16 +181,30 @@ export function AttendancePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-bold text-neutral-900">الحضور</h1>
-        <p className="text-sm text-neutral-500">تسجيل ومتابعة حضور الطلاب اليومي</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-neutral-900">الحضور</h1>
+          <p className="text-sm text-neutral-500">
+            {isClosed ? 'مراجعة سجلات حضور الطلاب' : 'تسجيل ومتابعة حضور الطلاب اليومي'}
+          </p>
+        </div>
+        {isClosed && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-600">
+            <Eye className="h-3.5 w-3.5" />
+            عرض فقط
+          </span>
+        )}
       </div>
 
+      {isClosed && <ClosedBanner />}
+
       {departmentId && data && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className={`grid grid-cols-1 gap-3 ${isClosed ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
           <StatCard icon={<ClipboardList className="h-5 w-5" />} label="إجمالي سجلات الحضور" value={data.totalCount} />
           <StatCard icon={<Clock className="h-5 w-5" />} label="متأخرون في هذه الصفحة" value={lateCount} />
-          <StatCard icon={<Users className="h-5 w-5" />} label="طلاب متبقّون لم يسجلوا" value={availableChildren.length} />
+          {!isClosed && (
+            <StatCard icon={<Users className="h-5 w-5" />} label="طلاب متبقّون لم يسجلوا" value={availableChildren.length} />
+          )}
         </div>
       )}
 
@@ -184,7 +220,7 @@ export function AttendancePage() {
             }}
           />
         </div>
-        {departmentId && isPrimary && (
+        {departmentId && isPrimary && !isClosed && (
           <div className="w-full max-w-xs">
             <ClassSelector
               branchId={branchId}
@@ -208,44 +244,58 @@ export function AttendancePage() {
       {!departmentId ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-300 bg-surface p-14 text-center">
           <UserCheck className="h-8 w-8 text-neutral-300" />
-          <p className="text-sm font-medium text-neutral-600">برجاء اختيار قسم لعرض/تسجيل الحضور</p>
+          <p className="text-sm font-medium text-neutral-600">
+            {isClosed ? 'برجاء اختيار قسم لعرض الحضور' : 'برجاء اختيار قسم لعرض/تسجيل الحضور'}
+          </p>
           <p className="text-xs text-neutral-400">اختر القسم والفترة من القائمة أعلاه للبدء</p>
         </div>
       ) : (
         <>
-          <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="w-full max-w-sm">
-                <MultiSelect
-                  options={childOptions}
-                  value={validSelectedIds}
-                  onChange={setSelectedChildIds}
-                  placeholder={
-                    needsClassroom
-                      ? 'اختر الفصل أولًا'
-                      : availableChildren.length === 0
-                        ? 'كل الطلاب سجلوا حضورهم'
-                        : 'اختر طالب أو أكثر لتسجيل حضورهم'
-                  }
-                  searchPlaceholder="ابحث باسم الطالب..."
-                  emptyMessage="لا يوجد طالب بهذا الاسم"
-                  disabled={needsClassroom || availableChildren.length === 0}
-                />
+          {!isClosed && (
+            <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                <div className="w-full max-w-sm">
+                  <MultiSelect
+                    options={childOptions}
+                    value={validSelectedIds}
+                    onChange={setSelectedChildIds}
+                    placeholder={
+                      needsClassroom
+                        ? 'اختر الفصل أولًا'
+                        : availableChildren.length === 0
+                          ? 'كل الطلاب سجلوا حضورهم'
+                          : 'اختر طالب أو أكثر لتسجيل حضورهم'
+                    }
+                    searchPlaceholder="ابحث باسم الطالب..."
+                    emptyMessage="لا يوجد طالب بهذا الاسم"
+                    disabled={needsClassroom || availableChildren.length === 0}
+                  />
+                </div>
+
+                <Button
+                  variant="outline"
+                  icon={<Users className="h-4 w-4" />}
+                  onClick={handleToggleAll}
+                  disabled={needsClassroom || childOptions.length === 0 || addBulkAttendance.isPending}
+                >
+                  {allSelected ? 'إلغاء تحديد الكل' : `تحديد الكل (${childOptions.length})`}
+                </Button>
+
+                <Button
+                  icon={<UserCheck className="h-4 w-4" />}
+                  onClick={handleRegisterAttendance}
+                  isLoading={addBulkAttendance.isPending}
+                  disabled={validSelectedIds.length === 0 || addBulkAttendance.isPending}
+                >
+                  {validSelectedIds.length > 1 ? `تسجيل حضور (${validSelectedIds.length})` : 'تسجيل حضور'}
+                </Button>
               </div>
-              <Button
-                icon={<UserCheck className="h-4 w-4" />}
-                onClick={handleRegisterAttendance}
-                isLoading={addBulkAttendance.isPending}
-                disabled={validSelectedIds.length === 0 || addBulkAttendance.isPending}
-              >
-                {validSelectedIds.length > 1 ? `تسجيل حضور (${validSelectedIds.length})` : 'تسجيل حضور'}
+
+              <Button variant="danger" size="sm" icon={<AlertOctagon className="h-4 w-4" />} onClick={() => setDeletingAll(true)}>
+                حذف كل السجلات
               </Button>
             </div>
-
-            <Button variant="danger" size="sm" icon={<AlertOctagon className="h-4 w-4" />} onClick={() => setDeletingAll(true)}>
-              حذف كل السجلات
-            </Button>
-          </div>
+          )}
 
           <div className="rounded-xl border border-neutral-200 bg-white shadow-sm">
             <DataTable
@@ -255,15 +305,19 @@ export function AttendancePage() {
               isError={isError}
               getRowId={(row) => row.id}
               emptyMessage="لا يوجد سجلات حضور اليوم لهذا القسم"
-              rowActions={(row) => (
-                <button
-                  onClick={() => setDeleting(row)}
-                  className="rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-danger/10 hover:text-danger"
-                  aria-label="حذف"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              )}
+              rowActions={
+                isClosed
+                  ? undefined
+                  : (row) => (
+                      <button
+                        onClick={() => setDeleting(row)}
+                        className="rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-danger/10 hover:text-danger"
+                        aria-label="حذف"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )
+              }
             />
             {data && (
               <div className="border-t border-neutral-100 px-4 py-3">
@@ -282,7 +336,7 @@ export function AttendancePage() {
       )}
 
       <ConfirmModal
-        isOpen={!!deleting}
+        isOpen={!isClosed && !!deleting}
         onClose={() => setDeleting(null)}
         onConfirm={() => deleting && deleteAttendance.mutate(deleting.id, { onSuccess: () => setDeleting(null) })}
         title="حذف سجل الحضور"
@@ -291,7 +345,7 @@ export function AttendancePage() {
       />
 
       <DangerConfirmModal
-        isOpen={deletingAll}
+        isOpen={!isClosed && deletingAll}
         onClose={() => setDeletingAll(false)}
         onConfirm={() => deleteAllAttendance.mutate(undefined, { onSuccess: () => setDeletingAll(false) })}
         title="حذف جميع سجلات الحضور"

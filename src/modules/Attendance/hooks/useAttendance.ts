@@ -59,6 +59,8 @@ export function useAddAttendance(branchId: string) {
   });
 }
 
+const BULK_CHUNK_SIZE = 5;
+
 export function useAddBulkAttendance(branchId: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -73,10 +75,20 @@ export function useAddBulkAttendance(branchId: string) {
       dateTime: string;
       lateMinutes?: number;
     }) => {
-      const results = await Promise.allSettled(
-        childIds.map((childId) => attendanceService.addForDepartmentChild(branchId, departmentId, childId, dateTime, lateMinutes))
-      );
-      const failedIds = childIds.filter((_, i) => results[i].status === 'rejected');
+      const failedIds: string[] = [];
+
+      for (let i = 0; i < childIds.length; i += BULK_CHUNK_SIZE) {
+        const chunk = childIds.slice(i, i + BULK_CHUNK_SIZE);
+        const results = await Promise.allSettled(
+          chunk.map((childId) =>
+            attendanceService.addForDepartmentChild(branchId, departmentId, childId, dateTime, lateMinutes)
+          )
+        );
+        results.forEach((r, idx) => {
+          if (r.status === 'rejected') failedIds.push(chunk[idx]);
+        });
+      }
+
       return { total: childIds.length, succeeded: childIds.length - failedIds.length, failedIds };
     },
     onSuccess: ({ total, succeeded, failedIds }) => {

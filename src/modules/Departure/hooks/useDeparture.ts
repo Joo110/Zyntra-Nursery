@@ -28,6 +28,8 @@ export function useAddDeparture(branchId: string) {
   });
 }
 
+const BULK_CHUNK_SIZE = 5;
+
 export function useAddBulkDeparture(branchId: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -40,10 +42,18 @@ export function useAddBulkDeparture(branchId: string) {
       childIds: string[];
       dateTime: string;
     }) => {
-      const results = await Promise.allSettled(
-        childIds.map((childId) => departureService.addForDepartmentChild(branchId, departmentId, childId, dateTime))
-      );
-      const failedIds = childIds.filter((_, i) => results[i].status === 'rejected');
+      const failedIds: string[] = [];
+
+      for (let i = 0; i < childIds.length; i += BULK_CHUNK_SIZE) {
+        const chunk = childIds.slice(i, i + BULK_CHUNK_SIZE);
+        const results = await Promise.allSettled(
+          chunk.map((childId) => departureService.addForDepartmentChild(branchId, departmentId, childId, dateTime))
+        );
+        results.forEach((r, idx) => {
+          if (r.status === 'rejected') failedIds.push(chunk[idx]);
+        });
+      }
+
       return { total: childIds.length, succeeded: childIds.length - failedIds.length, failedIds };
     },
     onSuccess: ({ total, succeeded, failedIds }) => {
