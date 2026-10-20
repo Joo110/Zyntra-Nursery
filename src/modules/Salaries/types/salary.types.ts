@@ -37,4 +37,5 @@ export interface AddSalaryDto {
 
 export interface UpdateSalaryDto extends AddSalaryDto {
   id: string;
+  userId: string;
 }

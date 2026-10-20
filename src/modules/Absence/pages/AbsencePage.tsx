@@ -20,6 +20,17 @@ import { PageLoader } from '@/components/loading/PageLoader';
 import { Period } from '@/types/enums.types';
 
 const PAGE_SIZE = 10;
+const EGYPT_TZ = 'Africa/Cairo';
+
+// تاريخ اليوم بتوقيت مصر بصيغة YYYY-MM-DD
+function egyptToday(): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: EGYPT_TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+}
 
 function StatCard({ icon, label, value, tone = 'default' }: { icon: React.ReactNode; label: string; value: string | number; tone?: 'default' | 'danger' }) {
   return (
@@ -73,7 +84,7 @@ export function AbsencePage() {
   const deleteAllAbsence = useDeleteAllAbsence(branchId ?? '');
 
   const todayCount = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = egyptToday();
     return (data?.items ?? []).filter((i) => i.date?.slice(0, 10) === today).length;
   }, [data?.items]);
 
@@ -82,9 +93,7 @@ export function AbsencePage() {
 
   const handleAbsentSelected = () => {
     if (validAbsentIds.length === 0 || addBulkAbsence.isPending) return;
-    const now = new Date();
-    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    addBulkAbsence.mutate({ childIds: validAbsentIds, date }, { onSuccess: () => setAbsentIds([]) });
+    addBulkAbsence.mutate({ childIds: validAbsentIds, date: egyptToday() }, { onSuccess: () => setAbsentIds([]) });
   };
 
   if (!branchId) return <PageLoader label="برجاء اختيار فرع أولًا..." />;

@@ -4,12 +4,13 @@ import { attendanceService } from '../services/attendanceService';
 import type { AddAttendanceHistoryDto } from '../types/attendance.types';
 import type { MemberType } from '../../Salaries/types/enums.types';
 import type { ApiError } from '@/types/api-error.types';
+import type { Period } from '@/types/enums.types';
 import { absenceKeys } from '@/modules/Absence/hooks/useAbsence';
 
 export const attendanceKeys = {
   all: ['attendance'] as const,
-  byDepartment: (branchId: string, departmentId: string, pageNumber: number, take: number) =>
-    [...attendanceKeys.all, branchId, departmentId, { pageNumber, take }] as const,
+  byDepartment: (branchId: string, departmentId: string, pageNumber: number, take: number, period?: Period) =>
+    [...attendanceKeys.all, branchId, departmentId, { pageNumber, take, period: period ?? null }] as const,
   history: (branchId: string, memberType: MemberType, pageNumber: number, take: number) =>
     [...attendanceKeys.all, 'history', branchId, memberType, { pageNumber, take }] as const,
 };
@@ -36,10 +37,16 @@ export function useAddMemberAttendance(branchId: string) {
   });
 }
 
-export function useAttendanceByDepartment(branchId: string, departmentId: string, pageNumber: number, take: number) {
+export function useAttendanceByDepartment(
+  branchId: string,
+  departmentId: string,
+  pageNumber: number,
+  take: number,
+  period?: Period
+) {
   return useQuery({
-    queryKey: attendanceKeys.byDepartment(branchId, departmentId, pageNumber, take),
-    queryFn: () => attendanceService.getByDepartment(branchId, departmentId, pageNumber, take),
+    queryKey: attendanceKeys.byDepartment(branchId, departmentId, pageNumber, take, period),
+    queryFn: () => attendanceService.getByDepartment(branchId, departmentId, pageNumber, take, period),
     enabled: !!branchId && !!departmentId,
     staleTime: 0,
     refetchOnWindowFocus: true,
@@ -49,8 +56,19 @@ export function useAttendanceByDepartment(branchId: string, departmentId: string
 export function useAddAttendance(branchId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ departmentId, childId, dateTime, lateMinutes }: { departmentId: string; childId: string; dateTime: string; lateMinutes?: number }) =>
-      attendanceService.addForDepartmentChild(branchId, departmentId, childId, dateTime, lateMinutes),
+    mutationFn: ({
+      departmentId,
+      childId,
+      dateTime,
+      lateMinutes,
+      period,
+    }: {
+      departmentId: string;
+      childId: string;
+      dateTime: string;
+      lateMinutes?: number;
+      period?: Period;
+    }) => attendanceService.addForDepartmentChild(branchId, departmentId, childId, dateTime, lateMinutes, period),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: attendanceKeys.all });
       toast.success('تم تسجيل الحضور بنجاح');
@@ -69,11 +87,13 @@ export function useAddBulkAttendance(branchId: string) {
       childIds,
       dateTime,
       lateMinutes,
+      period,
     }: {
       departmentId: string;
       childIds: string[];
       dateTime: string;
       lateMinutes?: number;
+      period?: Period;
     }) => {
       const failedIds: string[] = [];
 
@@ -81,7 +101,7 @@ export function useAddBulkAttendance(branchId: string) {
         const chunk = childIds.slice(i, i + BULK_CHUNK_SIZE);
         const results = await Promise.allSettled(
           chunk.map((childId) =>
-            attendanceService.addForDepartmentChild(branchId, departmentId, childId, dateTime, lateMinutes)
+            attendanceService.addForDepartmentChild(branchId, departmentId, childId, dateTime, lateMinutes, period)
           )
         );
         results.forEach((r, idx) => {

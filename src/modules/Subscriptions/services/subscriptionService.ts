@@ -24,7 +24,7 @@ export const subscriptionService = {
       })
       .then((res) => res.data),
 
-      
+
   getDepartmentSummary: async (
     branchId: string,
     departmentId: string,
@@ -71,6 +71,7 @@ export const subscriptionService = {
   add: (branchId: string, dto: AddSubscriptionDto) =>
     axiosInstance.post<MessageResponse>(`/branches/${branchId}/Subscriptions`, dto).then((res) => res.data),
 
+  // dto لازم يحتوي على userId (UpdateSubscriptionAsync => SubscriptionController)
   update: (branchId: string, dto: UpdateSubscriptionDto) =>
     axiosInstance.put<MessageResponse>(`/branches/${branchId}/Subscriptions`, dto).then((res) => res.data),
 

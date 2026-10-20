@@ -21,29 +21,43 @@ import { Period } from '@/types/enums.types';
 const PAGE_SIZE = 10;
 const ALL_RECORDS_TAKE = 1000;
 const LATE_THRESHOLD_MINUTES = 15;
+const EGYPT_TZ = 'Africa/Cairo';
 
-function formatDateTime(date: string, time?: string): string {
-  if (!date) return '—';
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return '—';
+// يعتبر القيمة القادمة من السيرفر UTC حتى لو جت من غير Z
+function parseUtc(date: string, time?: string): Date | null {
+  if (!date) return null;
+  const datePart = date.split('T')[0];
 
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-
-  let hours: string;
-  let minutes: string;
-
+  let iso: string;
   if (time) {
-    const parts = time.split(':');
-    hours = (parts[0] ?? '00').padStart(2, '0');
-    minutes = (parts[1] ?? '00').padStart(2, '0');
+    const [h = '00', m = '00', s = '00'] = time.split(':');
+    iso = `${datePart}T${h.padStart(2, '0')}:${m.padStart(2, '0')}:${s.split('.')[0].padStart(2, '0')}Z`;
   } else {
-    hours = String(d.getHours()).padStart(2, '0');
-    minutes = String(d.getMinutes()).padStart(2, '0');
+    iso = /Z$|[+-]\d{2}:?\d{2}$/.test(date) ? date : `${date}Z`;
   }
 
-  return `${day}/${month}/${year} - ${hours}:${minutes}`;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatDateTime(date: string, time?: string): string {
+  const d = parseUtc(date, time);
+  if (!d) return '—';
+
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: EGYPT_TZ,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  }).formatToParts(d);
+
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+  const period = get('dayPeriod').toUpperCase(); // AM / PM
+
+  return `${get('day')}/${get('month')}/${get('year')} - ${get('hour')}:${get('minute')} ${period}`;
 }
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
@@ -103,8 +117,10 @@ export function AttendancePage() {
   const [deleting, setDeleting] = useState<AttendanceHistoryDto | null>(null);
   const [deletingAll, setDeletingAll] = useState(false);
 
-  const { data, isLoading, isError } = useAttendanceByDepartment(branchId ?? '', departmentId, pageNumber, PAGE_SIZE);
-  const { data: allAttendance } = useAttendanceByDepartment(branchId ?? '', departmentId, 1, ALL_RECORDS_TAKE);
+  // الفترة (صباحي/مسائي) بتتبعت للسيرفر وبتدخل في الـ query key
+  // عشان السجل يتحدّث ويعرض سجلات الفترة المختارة
+  const { data, isLoading, isError } = useAttendanceByDepartment(branchId ?? '', departmentId, pageNumber, PAGE_SIZE, period);
+  const { data: allAttendance } = useAttendanceByDepartment(branchId ?? '', departmentId, 1, ALL_RECORDS_TAKE, period);
 
   const { children, isPrimary, needsClassroom } = useSelectableChildren(branchId ?? '', departmentId, period, classroomId);
   const attendanceWindow = useAttendanceWindow('enter');
@@ -153,7 +169,13 @@ export function AttendancePage() {
   const handleRegisterAttendance = () => {
     if (isClosed || validSelectedIds.length === 0 || !departmentId || addBulkAttendance.isPending) return;
     addBulkAttendance.mutate(
-      { departmentId, childIds: validSelectedIds, dateTime: new Date().toISOString(), lateMinutes: kidsLateMinutes },
+      {
+        departmentId,
+        childIds: validSelectedIds,
+        dateTime: new Date().toISOString(),
+        lateMinutes: kidsLateMinutes,
+        period,
+      },
       { onSuccess: () => setSelectedChildIds([]) }
     );
   };

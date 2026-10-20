@@ -59,10 +59,11 @@ export const salaryService = {
       })
       .then((res) => res.data),
 
-  pay: (branchId: string, salary: EmployeeSalaryDto, type: MemberType) =>
+  pay: (branchId: string, salary: EmployeeSalaryDto, type: MemberType, userId: string) =>
     axiosInstance
       .put<MessageResponse>(`/branches/${branchId}/Salaries`, {
         id: salary.id,
+        userId,
         employeeId: salary.employeeId,
         branchId,
         employeeType: MemberTypeBodyValue[type],

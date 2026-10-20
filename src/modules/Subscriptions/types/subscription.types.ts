@@ -40,6 +40,7 @@ export interface AddSubscriptionDto {
 
 export interface UpdateSubscriptionDto {
   id: string;
+  userId: string;
   childId?: string;
   amount?: number;
   monthSubscription?: string;

@@ -2,12 +2,13 @@ import { axiosInstance } from '@/services/api/axiosInstance';
 import type { PagedResult, MessageResponse } from '@/types/pagination.types';
 import { MemberTypeQueryName, MemberTypeBodyValue, type MemberType } from '../../Salaries/types/enums.types';
 import type { AttendanceHistoryDto, AddAttendanceHistoryDto } from '../types/attendance.types';
+import type { Period } from '@/types/enums.types';
 
 export const attendanceService = {
-  getByDepartment: (branchId: string, departmentId: string, pageNumber: number, take: number) =>
+  getByDepartment: (branchId: string, departmentId: string, pageNumber: number, take: number, period?: Period) =>
     axiosInstance
       .get<PagedResult<AttendanceHistoryDto>>(`/branches/${branchId}/Attendance/department/${departmentId}`, {
-        params: { pageNumber, take },
+        params: { pageNumber, take, period },
       })
       .then((res) => res.data),
 
@@ -18,10 +19,17 @@ export const attendanceService = {
       })
       .then((res) => res.data),
 
-  addForDepartmentChild: (branchId: string, departmentId: string, childId: string, dateTime: string, lateMinutes = 0) =>
+  addForDepartmentChild: (
+    branchId: string,
+    departmentId: string,
+    childId: string,
+    dateTime: string,
+    lateMinutes = 0,
+    period?: Period
+  ) =>
     axiosInstance
       .post<MessageResponse>(`/branches/${branchId}/Attendance/department/${departmentId}/child/${childId}`, null, {
-        params: { dateTime, lateMinutes },
+        params: { dateTime, lateMinutes, period },
       })
       .then((res) => res.data),
 
