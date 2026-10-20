@@ -6,6 +6,7 @@ import { SalaryReceiptModal } from '../components/SalaryReceiptModal';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { useBranchStore } from '@/app/providers/branchStore';
+import { useAuthStore } from '@/app/providers/authStore';
 import { PageLoader } from '@/components/loading/PageLoader';
 import { MemberType, MemberTypeLabels } from '../types/enums.types';
 import type { EmployeeSalaryDto } from '../types/salary.types';
@@ -29,6 +30,7 @@ const fmt = (n: number) => `${(n ?? 0).toLocaleString('ar-EG')} ج.م`;
 
 export function SalariesPage() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id);
+  const userId = useAuthStore((s) => s.user?.userId) ?? '';
   const [type, setType] = useState<MemberType>(MemberType.Teacher);
 
   const [deleting, setDeleting] = useState<EmployeeSalaryDto | null>(null);
@@ -165,11 +167,13 @@ export function SalariesPage() {
         )}
       />
 
-          <PayConfirmModal
+      <PayConfirmModal
         isOpen={!!paying}
         onClose={() => setPaying(null)}
         onConfirm={() =>
-          paying && paySalary.mutate({ salary: paying, type }, { onSuccess: () => setPaying(null) })
+          paying &&
+          userId &&
+          paySalary.mutate({ salary: paying, type, userId }, { onSuccess: () => setPaying(null) })
         }
         message={`هل تريد تأكيد دفع راتب "${paying?.employeeName}" بمبلغ ${fmt(paying?.amount ?? 0)}؟`}
         isLoading={paySalary.isPending}

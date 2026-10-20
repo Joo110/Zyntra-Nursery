@@ -17,6 +17,7 @@ import { DepartmentSelector } from '@/components/common/DepartmentSelector';
 import { GenderBadge } from '@/components/common/GenderBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { useBranchStore } from '@/app/providers/branchStore';
+import { useAuthStore } from '@/app/providers/authStore';
 import { PageLoader } from '@/components/loading/PageLoader';
 import { Period } from '@/types/enums.types';
 
@@ -30,6 +31,7 @@ function getSubscriptionId(row: PaymentSubscriptionInfoDto | null): string | nul
 
 export function SubscriptionsPage() {
   const branchId = useBranchStore((s) => s.selectedBranch?.id);
+  const userId = useAuthStore((s) => s.user?.userId) ?? '';
   const [searchParams, setSearchParams] = useSearchParams();
   const pageNumber = Number(searchParams.get('page') ?? '1');
   const departmentId = searchParams.get('departmentId') ?? '';
@@ -217,6 +219,7 @@ export function SubscriptionsPage() {
       <PayModal
         row={payingRow}
         subscriptionId={getSubscriptionId(payingRow)}
+        userId={userId}
         isLoading={updateSubscription.isPending}
         onClose={() => setPayingRow(null)}
         onConfirm={handlePayConfirm}

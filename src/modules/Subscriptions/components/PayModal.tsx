@@ -6,6 +6,7 @@ import type { PaymentSubscriptionInfoDto, UpdateSubscriptionDto } from '../types
 interface Props {
   row: PaymentSubscriptionInfoDto | null;
   subscriptionId: string | null;
+  userId: string;
   isLoading: boolean;
   onClose: () => void;
   onConfirm: (dto: UpdateSubscriptionDto) => void;
@@ -16,7 +17,7 @@ type Mode = 'pay' | 'edit';
 const inputCls =
   'w-full rounded-md border border-neutral-300 px-3 py-2 text-sm ltr-numerals focus:border-primary focus:outline-none';
 
-export function PayModal({ row, subscriptionId, isLoading, onClose, onConfirm }: Props) {
+export function PayModal({ row, subscriptionId, userId, isLoading, onClose, onConfirm }: Props) {
   const [mode, setMode] = useState<Mode>('pay');
   const [value, setValue] = useState('');
 
@@ -40,16 +41,16 @@ export function PayModal({ row, subscriptionId, isLoading, onClose, onConfirm }:
   };
 
   const submit = () => {
-    if (!subscriptionId || !valid) return;
+    if (!subscriptionId || !userId || !valid) return;
 
     if (mode === 'edit') {
-      onConfirm({ id: subscriptionId, amount: num });
+      onConfirm({ id: subscriptionId, userId, amount: num });
       return;
     }
     if (fullPay) {
-      onConfirm({ id: subscriptionId, isPaid: true, dateOfPayment: new Date().toISOString() });
+      onConfirm({ id: subscriptionId, userId, isPaid: true, dateOfPayment: new Date().toISOString() });
     } else {
-      onConfirm({ id: subscriptionId, amount: row.amount - num });
+      onConfirm({ id: subscriptionId, userId, amount: row.amount - num });
     }
   };
 
@@ -111,11 +112,17 @@ export function PayModal({ row, subscriptionId, isLoading, onClose, onConfirm }:
           </p>
         )}
 
+        {!userId && (
+          <p className="rounded-md bg-red-50 p-2 text-xs text-red-700">
+            لا يمكن التنفيذ: تعذّر تحديد المستخدم الحالي، برجاء إعادة تسجيل الدخول.
+          </p>
+        )}
+
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="secondary" onClick={onClose} disabled={isLoading}>
             إلغاء
           </Button>
-          <Button onClick={submit} disabled={!valid || !subscriptionId || isLoading}>
+          <Button onClick={submit} disabled={!valid || !subscriptionId || !userId || isLoading}>
             {isLoading ? 'جاري الحفظ...' : 'تأكيد'}
           </Button>
         </div>

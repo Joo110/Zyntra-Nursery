@@ -82,8 +82,8 @@ export function useEmployeeBaseSalary(
 export function usePaySalary(branchId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ salary, type }: { salary: EmployeeSalaryDto; type: MemberType }) =>
-      salaryService.pay(branchId, salary, type),
+    mutationFn: ({ salary, type, userId }: { salary: EmployeeSalaryDto; type: MemberType; userId: string }) =>
+      salaryService.pay(branchId, salary, type, userId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: salaryKeys.all });
       toast.success('تم دفع الراتب بنجاح');
