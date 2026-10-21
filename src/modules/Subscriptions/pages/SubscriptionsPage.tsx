@@ -8,8 +8,10 @@ import {
   useDepartmentSubscriptionSummary,
 } from '../hooks/useSubscriptions';
 import { PeriodSelector } from '../components/PeriodSelector';
-import { PayModal } from '../components/PayModal';
+import { PayModal, type PayMeta } from '../components/PayModal';
+import { ReceiptPrompt } from '../components/ReceiptPrompt';
 import { PaymentHistoryTab } from '../components/PaymentHistoryTab';
+import type { SubscriptionReceiptData } from '../hooks/printSubscriptionReceipt';
 import type { PaymentSubscriptionInfoDto, UpdateSubscriptionDto } from '../types/subscription.types';
 import { DataTable, type ColumnDef } from '@/components/tables/DataTable';
 import { Pagination } from '@/components/tables/Pagination';
@@ -37,6 +39,7 @@ export function SubscriptionsPage() {
   const departmentId = searchParams.get('departmentId') ?? '';
   const period = Number(searchParams.get('period') ?? Period.AM) as Period;
   const [payingRow, setPayingRow] = useState<PaymentSubscriptionInfoDto | null>(null);
+  const [receipt, setReceipt] = useState<SubscriptionReceiptData | null>(null);
   const [tab, setTab] = useState<'unpaid' | 'history'>('unpaid');
 
   const { data, isLoading, isError } = useUnpaidSubscriptions(
@@ -70,8 +73,26 @@ export function SubscriptionsPage() {
     setPayingRow(row);
   };
 
-  const handlePayConfirm = (dto: UpdateSubscriptionDto) => {
-    updateSubscription.mutate(dto, { onSuccess: () => setPayingRow(null) });
+  const handlePayConfirm = (dto: UpdateSubscriptionDto, meta: PayMeta) => {
+    const row = payingRow; // نحتفظ بالصف قبل ما يتقفل المودال
+    updateSubscription.mutate(dto, {
+      onSuccess: () => {
+        setPayingRow(null);
+
+        // الريسيت للدفع بس، التعديل / الخصم مفيهوش فلوس داخلة
+        if (row && meta.kind === 'pay') {
+          const withMonth = row as PaymentSubscriptionInfoDto & { monthSubscription?: string };
+          setReceipt({
+            childName: row.name,
+            amount: meta.paid,
+            monthSubscription: withMonth.monthSubscription ?? new Date().toISOString().slice(0, 10),
+            dateOfPayment: dto.dateOfPayment ?? new Date().toISOString(),
+            remainder: meta.remainder,
+            receiptNo: Date.now().toString(36).toUpperCase(),
+          });
+        }
+      },
+    });
   };
 
   const columns: ColumnDef<PaymentSubscriptionInfoDto>[] = [
@@ -224,6 +245,8 @@ export function SubscriptionsPage() {
         onClose={() => setPayingRow(null)}
         onConfirm={handlePayConfirm}
       />
+
+      <ReceiptPrompt receipt={receipt} onClose={() => setReceipt(null)} />
     </div>
   );
 }

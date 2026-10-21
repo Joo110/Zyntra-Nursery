@@ -8,18 +8,10 @@ import { ChildDropdown } from '@/components/common/ChildDropdown';
 import { DepartmentSelector } from '@/components/common/DepartmentSelector';
 import { FormField } from '@/components/forms/FormField';
 import { Button } from '@/components/common/Button';
-import { Modal } from '@/components/modals/Modal';
-import { Printer } from 'lucide-react';
 import { Period } from '@/types/enums.types';
-import { printSubscriptionReceipt, type SubscriptionReceiptData } from '../hooks/printSubscriptionReceipt';
+import type { SubscriptionReceiptData } from '../hooks/printSubscriptionReceipt';
+import { ReceiptPrompt } from './ReceiptPrompt';
 import { useDepartmentChildren } from '@/modules/Children/hooks/useChildren';
-
-const CENTER_INFO = {
-  name:    'حضانة أجيال المستقبل',
-  phone:   '01066309169',
-  address: 'قرية 4/13 خط عرابي (حضانة أجيال المستقبل)',
-  logoUrl: '',
-};
 
 interface Props {
   branchId: string;
@@ -39,9 +31,7 @@ export function SubscriptionForm({
   });
 
   const [departmentId, setDepartmentId] = useState(initialDepartmentId ?? '');
-
   const { data: children } = useDepartmentChildren(branchId, departmentId ?? '', period);
-
   const [pendingReceipt, setPendingReceipt] = useState<SubscriptionReceiptData | null>(null);
 
   const handleFormSubmit = async (data: AddSubscriptionFormValues) => {
@@ -53,13 +43,18 @@ export function SubscriptionForm({
       const childName = children?.find((c) => c.id === values.childId)?.name ?? '—';
       setPendingReceipt({
         childName,
-        amount:            Number(values.amount) || 0,
+        amount: Number(values.amount) || 0,
         monthSubscription: values.monthSubscription,
-        dateOfPayment:     values.dateOfPayment ?? now,
-        remainder:         0, // لو دُفع بالكامل وقت الإنشاء
-        receiptNo:         Date.now().toString(36).toUpperCase(),
+        dateOfPayment: values.dateOfPayment ?? now,
+        remainder: 0, // اتدفع بالكامل وقت الإنشاء
+        receiptNo: Date.now().toString(36).toUpperCase(),
       });
     }
+  };
+
+  const closeReceipt = () => {
+    setPendingReceipt(null);
+    onCancel();
   };
 
   return (
@@ -93,35 +88,7 @@ export function SubscriptionForm({
         </div>
       </form>
 
-      {pendingReceipt && (
-        <Modal
-          isOpen={!!pendingReceipt}
-          title="طباعة وصل الاشتراك"
-          onClose={() => { setPendingReceipt(null); onCancel(); }}
-          size="sm"
-        >
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
-              <Printer className="h-8 w-8 text-emerald-600" />
-            </div>
-            <p className="text-slate-700 font-semibold">تم تسجيل الاشتراك بنجاح</p>
-            <p className="text-sm text-slate-500">
-              هل تريد طباعة وصل لـ <strong>{pendingReceipt.childName}</strong>؟
-            </p>
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={() => { printSubscriptionReceipt(pendingReceipt, CENTER_INFO); setPendingReceipt(null); onCancel(); }}
-                className="btn-primary flex-1 justify-center gap-2"
-              >
-                <Printer className="h-4 w-4" /> طباعة الوصل
-              </button>
-              <button onClick={() => { setPendingReceipt(null); onCancel(); }} className="btn-secondary flex-1 justify-center">
-                تخطي
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      <ReceiptPrompt receipt={pendingReceipt} onClose={closeReceipt} />
     </>
   );
 }
